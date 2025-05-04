@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKFLIX</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <meta name="description" content="AKFLIX - A Netflix clone streaming platform" />
+  <link rel="apple-touch-icon" href="logo192.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #141414;
+      color: white;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    /* Netflix-like loading animation */
+    .loading-logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <!-- Loading state -->
+    <div class="loading-container">
+      <img src="logo.svg" alt="AKFLIX" class="loading-logo" />
+    </div>
+  </div>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+</body>
+</html> 
