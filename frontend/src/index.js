@@ -6,6 +6,7 @@ import './styles/global.css';
 import backdropUtils from './utils/updateBackdrops';
 import movieImportUtils from './utils/importMoviesData';
 import backdropChecker from './utils/checkBackdropUrls';
+import reportWebVitals from './reportWebVitals';
 
 // Make util functions available in the console for debugging
 if (process.env.NODE_ENV !== 'production') {
@@ -31,4 +32,9 @@ root.render(
       <App />
     </BrowserRouter>
   </React.StrictMode>
-); 
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals(); 
