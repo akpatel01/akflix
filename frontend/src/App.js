@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Home from './pages/Home';
@@ -21,6 +21,8 @@ import MovieDetail from './pages/Admin/MovieDetail';
 import ImportMovies from './pages/Admin/ImportMovies';
 import UserManagement from './pages/Admin/UserManagement';
 import Statistics from './pages/Admin/Statistics';
+import GenreManagement from './pages/Admin/GenreManagement';
+import CategoriesPage from './pages/CategoriesPage';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { useAuth } from './context/AuthContext';
@@ -59,6 +61,7 @@ function AppContent() {
         <Route path="/tv-shows" element={<TVShows />} />
         <Route path="/watch/:id" element={<Player />} />
         <Route path="/genre/:genreId" element={<GenrePage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/watched" element={<Watched />} />
         <Route path="/search" element={<SearchResults />} />
@@ -74,14 +77,14 @@ function AppContent() {
             <AdminRoute>
               <Routes>
                 <Route path="/" element={<Dashboard />}>
-                  <Route index element={<div className="p-6 text-center text-gray-400">Select a section from the tabs above</div>} />
+                  <Route index element={<Navigate to="/admin/movies" replace />} />
                   <Route path="movies" element={<MovieManagement />} />
                   <Route path="movies/new" element={<MovieForm />} />
                   <Route path="movies/edit/:id" element={<MovieForm />} />
                   <Route path="movies/view/:id" element={<MovieDetail />} />
                   <Route path="movies/import" element={<ImportMovies />} />
                   <Route path="tv-shows" element={<div className="p-6 text-center text-gray-400">TV Show management coming soon</div>} />
-                  <Route path="genres" element={<div className="p-6 text-center text-gray-400">Genre management coming soon</div>} />
+                  <Route path="genres" element={<GenreManagement />} />
                   <Route path="users" element={<UserManagement />} />
                   <Route path="stats" element={<Statistics />} />
                 </Route>
@@ -95,7 +98,19 @@ function AppContent() {
 }
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isAdminSetupRoute = window.location.pathname === '/admin-setup';
+  const location = useLocation();
+
+  // Close sidebar when route changes (especially on mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Function to toggle sidebar
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
   
   return (
     <AuthProvider>
@@ -106,10 +121,10 @@ function App() {
           </CleanLayout>
         ) : (
           <>
-            <Header />
+            <Header toggleSidebar={toggleSidebar} />
             <div className="flex h-screen">
-              <Sidebar />
-              <main className="flex-1 pt-[60px] ml-[240px] overflow-y-auto">
+              <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+              <main className="flex-1 ml-16 pt-16 overflow-y-auto bg-black">
                 <AppContent />
               </main>
             </div>

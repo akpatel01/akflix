@@ -18,7 +18,7 @@ const MovieSlider = ({ title, movies }) => {
   };
 
   return (
-    <div className="mb-10">
+    <div className="mb-16">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">{title}</h2>
         <div className="flex gap-2.5">
@@ -43,7 +43,7 @@ const MovieSlider = ({ title, movies }) => {
           className="flex gap-4 transition-transform duration-500 ease-in-out p-1"
         >
           {movies.map((movie) => (
-            <div key={movie.id} className="flex-none w-[220px] h-[330px]">
+            <div key={movie.id} className="flex-none w-[220px] aspect-[2/3]">
               <MovieCard movie={movie} />
             </div>
           ))}

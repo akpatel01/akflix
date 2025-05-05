@@ -8,13 +8,27 @@ const {
   updateMovie,
   deleteMovie,
   getStats,
-  incrementViewCount
+  incrementViewCount,
+  getCategories,
+  getSubcategories
 } = require('../controllers/movieController');
 const { protect, isAdmin } = require('../middlewares/auth');
+
+// Test route to check if API is responding
+router.get('/test', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Movies API is working',
+    path: req.path,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Public routes
 router.get('/', getMovies);
 router.get('/featured', getFeaturedMovies);
+router.get('/categories', getCategories);
+router.get('/categories/:category', getSubcategories);
 router.get('/stats', protect, isAdmin, getStats);
 router.get('/:id', getMovie);
 router.post('/:id/view', incrementViewCount);

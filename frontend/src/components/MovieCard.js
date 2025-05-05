@@ -17,13 +17,22 @@ const MovieCard = ({ movie }) => {
   const [showAddToWatchlistModal, setShowAddToWatchlistModal] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   
+  // Ensure movie has a valid ID
+  const movieId = movie._id || movie.id || `movie-${movie.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}`;
+  
   useEffect(() => {
     if (currentUser && currentUser.watchlist) {
-      setIsInWatchlist(userService.isInWatchlist(movie._id));
+      setIsInWatchlist(userService.isInWatchlist(movieId));
     } else {
       setIsInWatchlist(false);
     }
-  }, [currentUser, movie._id]);
+  }, [currentUser, movieId]);
+  
+  const handlePlayClick = (e) => {
+    e.preventDefault();
+    console.log('Play clicked for movie:', movie.title, 'with ID:', movieId);
+    navigate(`/watch/${movieId}`);
+  };
   
   const handleWatchlistClick = async (e) => {
     e.stopPropagation();
@@ -43,7 +52,7 @@ const MovieCard = ({ movie }) => {
     e.preventDefault();
     
     try {
-      const response = await userService.toggleWatchlist(movie._id);
+      const response = await userService.toggleWatchlist(movieId);
       
       if (response.success) {
         setIsInWatchlist(false);
@@ -84,30 +93,31 @@ const MovieCard = ({ movie }) => {
   
   return (
     <>
-      <div className="relative w-full rounded overflow-hidden transition-all duration-300 bg-[#222] group hover:scale-[1.03] hover:shadow-lg hover:z-10">
+      <div className="relative w-full h-full rounded overflow-hidden transition-all duration-300 bg-[#222] group hover:scale-[1.03] hover:shadow-lg hover:z-10">
         <img 
           src={movie.poster} 
           alt={movie.title} 
           className="w-full h-full object-cover block"
+          loading="lazy"
         />
         
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 opacity-0 transition-opacity duration-300 flex flex-col justify-end h-1/2 group-hover:opacity-100">
-          <h3 className="text-base font-semibold mb-1">{movie.title}</h3>
+          <h3 className="text-base font-semibold mb-1 line-clamp-1">{movie.title}</h3>
           
           <div className="flex items-center mb-1">
             <i className="fas fa-star text-netflix-red mr-1"></i>
             {movie.rating}/10
           </div>
           
-          <div>{movie.year} • {movie.duration}</div>
+          <div className="text-sm">{movie.year} • {movie.duration}</div>
           
           <div className="flex items-center justify-between mt-3">
-            <Link 
-              to={`/watch/${movie._id}`}
+            <button
+              onClick={handlePlayClick}
               className="bg-netflix-red border-none rounded px-3 py-1 flex items-center justify-center text-white text-sm font-medium mr-auto transition-colors hover:bg-netflix-red-hover"
             >
               <i className="fas fa-play mr-1"></i> Play
-            </Link>
+            </button>
             
             <button 
               onClick={isInWatchlist ? handleRemoveFromWatchlist : handleWatchlistClick}
@@ -138,7 +148,7 @@ const MovieCard = ({ movie }) => {
       <AddToWatchlistModal
         isOpen={showAddToWatchlistModal}
         onClose={() => setShowAddToWatchlistModal(false)}
-        movie={movie}
+        movie={{...movie, _id: movieId}}
       />
       
       {/* Like Confirmation */}

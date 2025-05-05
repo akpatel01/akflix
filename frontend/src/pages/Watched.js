@@ -80,8 +80,10 @@ const Watched = () => {
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
-          {watchedMovies.map(movie => (
-            <MovieCard key={movie._id} movie={movie} />
+          {watchedMovies.map(item => (
+            <div key={item._id} className="aspect-[2/3]">
+              <MovieCard movie={item} />
+            </div>
           ))}
         </div>
       )}

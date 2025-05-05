@@ -333,4 +333,102 @@ exports.incrementViewCount = async (req, res) => {
       message: 'Server error'
     });
   }
+};
+
+// @desc    Get all movie categories (genres)
+// @route   GET /api/movies/categories
+// @access  Public
+exports.getCategories = async (req, res) => {  
+
+  try {
+    // Aggregate to get unique genres across all movies
+    const categories = await Movie.aggregate([
+      { $unwind: '$genres' },
+      { $group: { _id: '$genres' } },
+      { $project: { name: '$_id', _id: 0 } },
+      { $sort: { name: 1 } }
+    ]);
+    
+    res.status(200).json({
+      success: true,
+      count: categories.length,
+      data: categories
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching categories',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get related categories or subcategories based on req params
+// @route   GET /api/movies/categories/:category
+// @access  Public
+exports.getSubcategories = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const { related = false, limit = 5 } = req.query;
+    
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category parameter is required'
+      });
+    }
+    
+    let query = {};
+    let result = [];
+    
+    if (related === 'true' || related === true) {
+      // Find movies that have this category
+      query = { genres: category };
+      
+      // Find other categories that frequently appear with the requested category
+      result = await Movie.aggregate([
+        { $match: query },
+        { $unwind: '$genres' },
+        { $match: { genres: { $ne: category } } }, // Exclude the requested category
+        { $group: { 
+          _id: '$genres', 
+          count: { $sum: 1 },
+          movies: { $push: { title: '$title', id: '$_id' } }
+        }},
+        { $project: { 
+          name: '$_id', 
+          count: 1,
+          movies: { $slice: ['$movies', parseInt(limit)] },
+          _id: 0 
+        }},
+        { $sort: { count: -1 } },
+        { $limit: parseInt(limit) }
+      ]);
+    } else {
+      // Get movies in this category with their specific subcategories/tags
+      // Return complete movie data to display in UI
+      const moviesInCategory = await Movie.find({ genres: category })
+        .limit(parseInt(limit))
+        .select('_id title year genres poster backdrop rating duration overview viewCount type isFeatured');
+      
+      result = {
+        category,
+        movies: moviesInCategory
+      };
+    }
+    
+    res.status(200).json({
+      success: true,
+      category,
+      count: Array.isArray(result) ? result.length : (result.movies ? result.movies.length : 0),
+      data: result
+    });
+  } catch (error) {
+    console.error('Error in getSubcategories:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching subcategories',
+      error: error.message
+    });
+  }
 }; 

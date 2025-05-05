@@ -71,8 +71,10 @@ const SearchResults = () => {
         <>
           <p className="mb-4 text-lg">{results.length} results found</p>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
-            {results.map(item => (
-              <MovieCard key={item._id} movie={item} />
+            {results.map(result => (
+              <div key={result._id} className="aspect-[2/3]">
+                <MovieCard movie={result} />
+              </div>
             ))}
           </div>
         </>

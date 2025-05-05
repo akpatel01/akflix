@@ -15,6 +15,42 @@
   a {
     @apply no-underline text-inherit;
   }
+  
+  /* Add responsive font scaling */
+  html {
+    font-size: 14px;
+  }
+  
+  @screen md {
+    html {
+      font-size: 15px;
+    }
+  }
+  
+  @screen lg {
+    html {
+      font-size: 16px;
+    }
+  }
+}
+
+/* Custom component classes */
+@layer components {
+  .container-fluid {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+  
+  .page-container {
+    @apply p-4 md:p-6 lg:p-8;
+  }
+  
+  .card {
+    @apply bg-netflix-dark rounded-md overflow-hidden shadow-lg;
+  }
+  
+  .grid-auto-fill {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4;
+  }
 }
 
 /* Custom scrollbar */
@@ -33,4 +69,16 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  /* Improve touch experience */
+  .touch-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
 } 

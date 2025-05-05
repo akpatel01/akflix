@@ -7,7 +7,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test-api": "node test-api.js",
+    "test-category-api": "node src/testCategoryAPI.js",
+    "test-movies-category": "node test-categories.js",
+    "test-subcategories": "node test-subcategories.js"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^6.6.3",
