@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://akflix-backend.onrender.com/api';
 
 // Create an axios instance with default configs
 const api = axios.create({
