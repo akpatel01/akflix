@@ -114,7 +114,7 @@ const Sidebar = () => {
   }
   
   return (
-    <aside className="fixed top-0 left-0 h-full w-16 py-4 z-[900] bg-black hidden lg:flex flex-col items-center">
+    <aside className="fixed top-0 left-0 h-full w-16 pb-4 z-[900] bg-black hidden lg:flex flex-col items-center">
       <div className="flex flex-col items-center w-full h-full">
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center h-16 w-full mb-8">

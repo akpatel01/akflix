@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import VideoPlayer from '../components/VideoPlayer';
+import EnhancedVideoPlayer from '../components/EnhancedVideoPlayer';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
 import movieService from '../services/movieService';
@@ -23,6 +23,8 @@ const Player = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showWatchlistConfirm, setShowWatchlistConfirm] = useState(false);
   const [hasMarkedAsWatched, setHasMarkedAsWatched] = useState(false);
+  const [relatedContent, setRelatedContent] = useState([]);
+  const [showVideoOptions, setShowVideoOptions] = useState(false);
   
   const handleUpdateWatched = useCallback(async (movieId, movieTitle) => {
     if (!currentUser) return;
@@ -105,6 +107,39 @@ const Player = () => {
     }
   }, [content, currentUser, id, hasMarkedAsWatched, handleUpdateWatched]);
   
+  // Fetch related content
+  useEffect(() => {
+    if (!content || !content.genres || content.genres.length === 0) return;
+    
+    const fetchRelatedContent = async () => {
+      try {
+        // Pick a random genre from the movie
+        const randomGenre = content.genres[Math.floor(Math.random() * content.genres.length)];
+        
+        const response = await movieService.getMoviesByGenre(randomGenre);
+        
+        if (response.success && response.data) {
+          // Filter out the current movie and limit to 6 items
+          const filtered = response.data
+            .filter(movie => movie._id !== id)
+            .slice(0, 6);
+          
+          setRelatedContent(filtered);
+        }
+      } catch (error) {
+        console.error('Error fetching related content:', error);
+        // Fallback to some random movies from the fallback data
+        const filtered = fallbackMovies
+          .filter(movie => movie._id !== id)
+          .slice(0, 6);
+          
+        setRelatedContent(filtered);
+      }
+    };
+    
+    fetchRelatedContent();
+  }, [content, id]);
+  
   const handleBack = () => {
     navigate(-1);
   };
@@ -142,6 +177,14 @@ const Player = () => {
       toast.error(err.message || 'An error occurred');
       console.error(err);
     }
+  };
+  
+  const handleVideoOptions = () => {
+    setShowVideoOptions(!showVideoOptions);
+  };
+  
+  const handlePlayRelated = (relatedId) => {
+    navigate(`/watch/${relatedId}`);
   };
   
   if (loading) {
@@ -183,6 +226,9 @@ const Player = () => {
   // Get video source directly from content
   const videoSource = content.videoUrl || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
   
+  // Get additional video info for the enhanced player
+  const videoSubtitle = `${content.year} • ${content.genres?.join(', ')}`;
+  
   return (
     <div className="relative bg-black">
       {usingFallbackData && (
@@ -208,10 +254,11 @@ const Player = () => {
       {/* Video Player */}
       <div className="min-h-screen flex flex-col">
         <div className="relative w-full aspect-video bg-gray-900">
-          <VideoPlayer 
+          <EnhancedVideoPlayer 
             src={videoSource} 
             poster={content.backdrop} 
             title={content.title}
+            subtitle={videoSubtitle}
           />
           
           <button 
@@ -220,6 +267,29 @@ const Player = () => {
           >
             <i className="fas fa-arrow-left"></i>
           </button>
+          
+          <button 
+            onClick={handleVideoOptions}
+            className="absolute top-4 right-4 bg-black/50 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/70 z-20"
+          >
+            <i className="fas fa-ellipsis-v"></i>
+          </button>
+          
+          {showVideoOptions && (
+            <div className="absolute top-16 right-4 bg-gray-900/95 shadow-lg rounded-md overflow-hidden z-20">
+              <ul className="py-2">
+                <li className="px-4 py-2 hover:bg-gray-800 cursor-pointer flex items-center text-white">
+                  <i className="fas fa-closed-captioning mr-3"></i> Subtitles
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-800 cursor-pointer flex items-center text-white">
+                  <i className="fas fa-cog mr-3"></i> Video Settings
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-800 cursor-pointer flex items-center text-white">
+                  <i className="fas fa-exclamation-triangle mr-3"></i> Report Issue
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
         
         <div className="flex-1 p-6">
@@ -231,6 +301,13 @@ const Player = () => {
                   alt={content.title} 
                   className="w-full rounded shadow-lg"
                 />
+                
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="bg-gray-800 p-3 rounded">
+                    <h3 className="text-sm text-gray-400 mb-1">Audio</h3>
+                    <p className="text-white font-medium">5.1 Surround Sound</p>
+                  </div>
+                </div>
               </div>
               
               <div className="md:w-3/4">
@@ -274,7 +351,7 @@ const Player = () => {
                   )}
                 </div>
                 
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <button 
                     onClick={handleAddToWatchlist}
                     className="bg-white text-black px-5 py-2 rounded flex items-center"
@@ -294,9 +371,45 @@ const Player = () => {
                       Watch Trailer
                     </a>
                   )}
+                  
+                  <button 
+                    className="bg-transparent border border-white text-white px-5 py-2 rounded flex items-center hover:bg-white/10"
+                  >
+                    <i className="fas fa-share-alt mr-2"></i>
+                    Share
+                  </button>
                 </div>
               </div>
             </div>
+            
+            {/* Related Content Section */}
+            {relatedContent.length > 0 && (
+              <div className="mt-12">
+                <h2 className="text-2xl font-bold mb-6">More Like This</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {relatedContent.map((item) => (
+                    <div 
+                      key={item._id} 
+                      className="relative group cursor-pointer"
+                      onClick={() => handlePlayRelated(item._id)}
+                    >
+                      <img 
+                        src={item.poster} 
+                        alt={item.title} 
+                        className="w-full rounded shadow transition-transform duration-300 group-hover:brightness-75"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-black/60 w-12 h-12 rounded-full flex items-center justify-center">
+                          <i className="fas fa-play text-white"></i>
+                        </div>
+                      </div>
+                      <h3 className="mt-2 text-sm font-medium">{item.title}</h3>
+                      <p className="text-xs text-gray-400">{item.year}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
