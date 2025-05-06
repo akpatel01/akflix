@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import movieService from '../services/movieService';
 
-const Header = ({ toggleSidebar }) => {
+const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -58,7 +58,7 @@ const Header = ({ toggleSidebar }) => {
           setShowSuggestions(true);
         }
       } catch (error) {
-        console.error('Error fetching search suggestions:', error);
+        // Remove the console.error statement from here
       } finally {
         setIsSearching(false);
       }

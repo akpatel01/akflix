@@ -112,8 +112,7 @@ const VideoPlayer = ({ src, poster, title }) => {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play().catch(err => {
-          console.error('Error playing video:', err);
+        videoRef.current.play().catch(() => {
           setHasError(true);
         });
       }
@@ -145,7 +144,7 @@ const VideoPlayer = ({ src, poster, title }) => {
         videoElement.currentTime = newTime;
       }
     } catch (error) {
-      console.error('Error setting video currentTime:', error);
+      // Silently handle error setting video time
     }
   };
   
@@ -180,14 +179,14 @@ const VideoPlayer = ({ src, poster, title }) => {
     
     if (!isFullscreen) {
       if (playerRef.current.requestFullscreen) {
-        playerRef.current.requestFullscreen().catch(err => {
-          console.error('Error attempting to enable fullscreen:', err);
+        playerRef.current.requestFullscreen().catch(() => {
+          // Silent error handling
         });
       }
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch(err => {
-          console.error('Error attempting to exit fullscreen:', err);
+        document.exitFullscreen().catch(() => {
+          // Silent error handling
         });
       }
     }
@@ -258,7 +257,6 @@ const VideoPlayer = ({ src, poster, title }) => {
         className="absolute top-0 left-0 w-full h-full object-contain"
         onClick={(e) => e.stopPropagation()}
         onError={(e) => {
-          console.error('Video error:', e);
           setHasError(true);
         }}
       />

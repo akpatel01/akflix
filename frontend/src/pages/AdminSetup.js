@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const AdminSetup = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +14,7 @@ const AdminSetup = () => {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,10 +65,18 @@ const AdminSetup = () => {
           confirmPassword: '',
           setupKey: ''
         });
+        toast.success('Admin account created successfully!');
+        
+        // Auto login after 2 seconds
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      } else {
+        setError(response.data.message || 'Failed to create admin account');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
-      console.error('Admin setup error:', err);
+      // Silent error handling
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }

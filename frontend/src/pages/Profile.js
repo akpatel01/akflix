@@ -88,7 +88,7 @@ const Profile = () => {
                 contentItems.push(response.data);
               }
             } catch (err) {
-              console.error(`Error fetching movie ${id}:`, err);
+              // Silent error handling
             }
           }
           
@@ -98,7 +98,7 @@ const Profile = () => {
             setWatchedItems(contentItems);
           }
         } catch (err) {
-          console.error('Error fetching content:', err);
+          // Silent error handling
         } finally {
           setIsContentLoading(false);
         }
@@ -219,7 +219,6 @@ const Profile = () => {
       }
     } catch (err) {
       toast.error(err.message || 'An error occurred');
-      console.error(err);
     }
   };
   
@@ -251,7 +250,6 @@ const Profile = () => {
       }
     } catch (err) {
       toast.error(err.message || 'An error occurred');
-      console.error(err);
     }
   };
   

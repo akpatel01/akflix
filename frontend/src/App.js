@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MobileNavigation from './components/MobileNavigation';
@@ -19,7 +19,6 @@ import Dashboard from './pages/Admin/Dashboard';
 import MovieManagement from './pages/Admin/MovieManagement';
 import MovieForm from './pages/Admin/MovieForm';
 import MovieDetail from './pages/Admin/MovieDetail';
-import ImportMovies from './pages/Admin/ImportMovies';
 import UserManagement from './pages/Admin/UserManagement';
 import Statistics from './pages/Admin/Statistics';
 import GenreManagement from './pages/Admin/GenreManagement';
@@ -83,7 +82,6 @@ function AppContent() {
                   <Route path="movies/new" element={<MovieForm />} />
                   <Route path="movies/edit/:id" element={<MovieForm />} />
                   <Route path="movies/view/:id" element={<MovieDetail />} />
-                  <Route path="movies/import" element={<ImportMovies />} />
                   <Route path="tv-shows" element={<div className="p-6 text-center text-gray-400">TV Show management coming soon</div>} />
                   <Route path="genres" element={<GenreManagement />} />
                   <Route path="users" element={<UserManagement />} />
@@ -99,19 +97,7 @@ function AppContent() {
 }
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isAdminSetupRoute = window.location.pathname === '/admin-setup';
-  const location = useLocation();
-
-  // Close sidebar when route changes (especially on mobile)
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
-
-  // Function to toggle sidebar
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
   
   return (
     <AuthProvider>
@@ -122,7 +108,7 @@ function App() {
           </CleanLayout>
         ) : (
           <>
-            <Header toggleSidebar={toggleSidebar} />
+            <Header />
             <div className="flex h-screen">
               {/* Sidebar - hidden on mobile, visible on desktop */}
               <Sidebar />

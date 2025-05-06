@@ -43,7 +43,6 @@ const Movies = () => {
           useFallbackData();
         }
       } catch (error) {
-        console.error('Error fetching movies:', error);
         // Use fallback data on error
         useFallbackData();
       } finally {
@@ -81,7 +80,6 @@ const Movies = () => {
         }
       } catch (error) {
         // Silently use default genres on error
-        console.error('Error fetching genres:', error);
         setGenres(['all']);
       }
     };
@@ -113,13 +111,11 @@ const Movies = () => {
               performClientSideFiltering();
             }
           } catch (error) {
-            console.error('Error fetching filtered movies:', error);
             // Fall back to client-side filtering
             performClientSideFiltering();
           }
         }
       } catch (error) {
-        console.error('Error applying filter:', error);
         // On any error, just show what we have
         setFilteredMovies(movies);
       } finally {
@@ -129,7 +125,6 @@ const Movies = () => {
     
     // Client-side filtering function
     const performClientSideFiltering = () => {
-      console.log('Using client-side filtering for genre:', filter);
       // Case-insensitive filtering
       const filtered = movies.filter(movie => 
         movie.genres && 

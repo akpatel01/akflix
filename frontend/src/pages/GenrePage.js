@@ -56,11 +56,9 @@ const GenrePage = () => {
         const response = await apiUtils.get('/movies', { limit: 100 });
         
         if (response?.success && Array.isArray(response.data)) {
-          console.log(`Fetched ${response.data.length} movies for filtering`);
           setAllMovies(response.data);
           setUsingFallbackData(false);
         } else {
-          console.warn('API response unsuccessful, using fallback data');
           // Use fallback data
           const fallbackData = sampleMovies.map((movie, index) => ({
             ...movie,
@@ -70,7 +68,6 @@ const GenrePage = () => {
           setUsingFallbackData(true);
         }
       } catch (error) {
-        console.error('Error fetching all movies:', error);
         // Use fallback data
         const fallbackData = sampleMovies.map((movie, index) => ({
           ...movie,
@@ -97,7 +94,6 @@ const GenrePage = () => {
     const filterMoviesByGenre = async () => {
       try {
         const genreToFilter = activeSubGenre || genreId;
-        console.log(`Filtering movies for genre: ${genreToFilter}`);
         
         // Try to get from API first
         try {
@@ -107,18 +103,16 @@ const GenrePage = () => {
           });
           
           if (response?.success && Array.isArray(response.data) && response.data.length > 0) {
-            console.log(`Got ${response.data.length} movies from API for ${genreToFilter}`);
             setContent(response.data);
             setUsingFallbackData(false);
             setLoading(false);
             return;
           }
         } catch (apiError) {
-          console.error('API error, falling back to client filtering:', apiError);
+          // Silent error handling - falling back to client filtering
         }
         
         // If API call fails or returns no results, filter the allMovies array
-        console.log(`Filtering ${allMovies.length} movies for genre: ${genreToFilter}`);
         
         // Case-insensitive genre filtering
         const filteredMovies = allMovies.filter(movie => 
@@ -128,8 +122,6 @@ const GenrePage = () => {
           )
         );
         
-        console.log(`Found ${filteredMovies.length} movies matching ${genreToFilter}`);
-        
         if (filteredMovies.length > 0) {
           setContent(filteredMovies);
           setUsingFallbackData(usingFallbackData); // Keep existing fallback status
@@ -137,7 +129,6 @@ const GenrePage = () => {
           setError(`No movies found for ${genreToFilter}`);
         }
       } catch (error) {
-        console.error('Error filtering movies:', error);
         setError(`Error loading ${genreId} content`);
       } finally {
         setLoading(false);

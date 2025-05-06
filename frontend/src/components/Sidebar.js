@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import movieService from '../services/movieService';
-import apiUtils from '../utils/apiUtils';
 
 // Simplified MenuItem component with icon-focused design
-const MenuItem = ({ to, icon, children, onClick, isActive, showTooltip = true }) => {
+const MenuItem = ({ to, icon, children, onClick, showTooltip = true }) => {
   return (
     <NavLink 
       to={to}
@@ -15,80 +13,24 @@ const MenuItem = ({ to, icon, children, onClick, isActive, showTooltip = true })
          ${isActive ? 'text-white' : 'text-gray-500 hover:text-white'}`
       }
     >
-      <div className="relative flex items-center justify-center w-full h-full">
-        <i className={`${icon} text-xl group-hover:text-white transition-colors duration-300
-                      ${isActive ? 'text-white' : ''}`}></i>
-        {showTooltip && (
-          <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
-                         pointer-events-none bg-black/90 py-2 px-4 rounded transition-opacity duration-300 z-50">
-            {children}
-          </span>
-        )}
-      </div>
+      {({ isActive }) => (
+        <div className="relative flex items-center justify-center w-full h-full">
+          <i className={`${icon} text-xl group-hover:text-white transition-colors duration-300
+                        ${isActive ? 'text-white' : ''}`}></i>
+          {showTooltip && (
+            <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
+                           pointer-events-none bg-black/90 py-2 px-4 rounded transition-opacity duration-300 z-50">
+              {children}
+            </span>
+          )}
+        </div>
+      )}
     </NavLink>
   );
 };
 
-// Map genre names to Font Awesome icons
-const genreIcons = {
-  'Action': 'fas fa-running',
-  'Comedy': 'fas fa-laugh',
-  'Drama': 'fas fa-theater-masks',
-  'Horror': 'fas fa-ghost',
-  'Sci-Fi': 'fas fa-robot',
-  'Adventure': 'fas fa-mountain',
-  'Fantasy': 'fas fa-dragon',
-  'Romance': 'fas fa-heart',
-  'Animation': 'fas fa-child',
-  'Crime': 'fas fa-user-secret',
-  'Documentary': 'fas fa-file-video',
-  'Family': 'fas fa-users',
-  'Thriller': 'fas fa-mask',
-  'Mystery': 'fas fa-question-circle',
-  'War': 'fas fa-fighter-jet',
-  'Western': 'fas fa-hat-cowboy',
-  'History': 'fas fa-landmark',
-  'Music': 'fas fa-music',
-  'Biography': 'fas fa-user-tie'
-};
-
-// Default icon for genres without a specific mapping
-const defaultIcon = 'fas fa-film';
-
 const Sidebar = () => {
-  const location = useLocation();
   const { currentUser, isAdmin } = useAuth();
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
-  
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await apiUtils.get('/movies/categories');
-        
-        if (response.success && Array.isArray(response.data)) {
-          // Limit to maximum 8 categories for sidebar
-          setCategories(response.data.slice(0, 8));
-        } else {
-          setCategories([]);
-        }
-      } catch (error) {
-        // Silently fail - sidebar will work without categories
-        setCategories([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-  
-  // Get icon for a genre
-  const getGenreIcon = (genreName) => {
-    return genreIcons[genreName] || defaultIcon;
-  };
   
   // Define main navigation items
   const navigationItems = [

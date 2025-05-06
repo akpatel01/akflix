@@ -17,15 +17,10 @@ const apiUtils = {
   get: async (endpoint, params = {}, options = {}) => {
     const { silent = false } = options;
     
-    // Log the request for debugging
-    console.log(`DEBUG: API GET Request to ${endpoint}`, params);
-    
     try {
       const response = await api.get(endpoint, { params });
-      console.log(`DEBUG: API Response from ${endpoint}:`, response.data);
       return response.data;
     } catch (error) {
-      console.error(`ERROR: API GET ${endpoint} failed:`, error.message);
       return apiUtils.handleError(error, endpoint, silent);
     }
   },
@@ -99,9 +94,7 @@ const apiUtils = {
    * @private
    */
   handleError: (error, endpoint, silent = false) => {
-    if (!silent) {
-      console.error(`API Error (${endpoint}):`, error.message || error);
-    }
+    // Silent error handling
     
     if (error.response) {
       // The request was made and the server responded with an error status code
@@ -136,7 +129,6 @@ const apiUtils = {
 export const fetchCategoryRelated = async (category, options = {}) => {
   try {
     if (!category) {
-      console.error('Category parameter is required');
       return {
         success: false,
         message: 'Category parameter is required'
@@ -159,7 +151,6 @@ export const fetchCategoryRelated = async (category, options = {}) => {
       data: response.data.data
     };
   } catch (error) {
-    console.error('Error fetching category related data:', error);
     return {
       success: false,
       message: error.response?.data?.message || 'Failed to fetch category related data',
@@ -178,19 +169,15 @@ export const fetchCategoryRelated = async (category, options = {}) => {
  */
 export const fetchMoviesByCategory = async (category, options = {}) => {
   if (!category) {
-    console.error('Category parameter is required');
     return {
       success: false,
       message: 'Category parameter is required'
     };
   }
 
-  console.log(`Fetching movies for category: ${category}`, options);
-
   try {
     // First try the categories endpoint
     try {
-      console.log(`Attempting to use category-specific endpoint for ${category}`);
       const categoryResponse = await fetchCategoryRelated(category, {
         related: false,
         limit: options.limit || 20
@@ -198,7 +185,6 @@ export const fetchMoviesByCategory = async (category, options = {}) => {
       
       if (categoryResponse?.success && categoryResponse?.data?.movies) {
         const moviesArray = categoryResponse.data.movies;
-        console.log(`Category endpoint returned ${moviesArray.length} movies for ${category}`);
         
         // Verify that the movies have the required fields for display
         const validMovies = moviesArray.filter(movie => 
@@ -206,21 +192,15 @@ export const fetchMoviesByCategory = async (category, options = {}) => {
         );
         
         if (validMovies.length > 0) {
-          console.log(`Found ${validMovies.length} valid movies for ${category}`);
           // If we got valid movies from the category endpoint, return them
           return {
             success: true,
             data: validMovies
           };
-        } else {
-          console.warn(`No valid movies were found in the category response for ${category}`);
         }
-      } else {
-        console.warn(`Category endpoint did not return valid movies array for ${category}`);
       }
     } catch (categoryError) {
       // Silently fail and fall back to the regular endpoint
-      console.warn(`Category endpoint failed for ${category}:`, categoryError.message);
     }
     
     // Otherwise, fall back to the regular movies endpoint with genre filter
@@ -229,18 +209,10 @@ export const fetchMoviesByCategory = async (category, options = {}) => {
       ...options
     };
     
-    console.log(`Fetching with standard endpoint for ${category}`);
     const response = await apiUtils.get('/movies', queryParams);
-    
-    if (response?.success && Array.isArray(response.data)) {
-      console.log(`Standard endpoint returned ${response.data.length} movies for ${category}`);
-    } else {
-      console.warn(`Standard endpoint response for ${category} was unsuccessful:`, response);
-    }
     
     return response;
   } catch (error) {
-    console.error(`Error fetching movies by category ${category}:`, error);
     return {
       success: false,
       message: error.response?.data?.message || `Failed to fetch movies by category: ${category}`,

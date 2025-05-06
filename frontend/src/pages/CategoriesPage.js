@@ -89,7 +89,6 @@ const CategoriesPage = () => {
         } else {
           // Fallback to stats API if the first method fails
           // This is less efficient but ensures backward compatibility
-          console.log('Falling back to separate API calls');
           
           // Fetch all categories
           const categoriesResponse = await apiUtils.get('/movies/categories');

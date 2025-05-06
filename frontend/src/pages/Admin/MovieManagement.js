@@ -31,7 +31,7 @@ const MovieManagement = () => {
         const years = [...new Set(moviesData.map(movie => movie.year))].sort((a, b) => b - a);
         setAllYears(years);
       } catch (error) {
-        console.error('Error fetching movies:', error);
+        // Silent error handling
         toast.error('Failed to load movies');
       } finally {
         setLoading(false);
@@ -88,12 +88,18 @@ const MovieManagement = () => {
 
   const handleDelete = async (movieId) => {
     try {
-      await movieService.deleteMovie(movieId);
-      setMovies(movies.filter(movie => movie._id !== movieId));
-      toast.success('Movie deleted successfully');
+      const response = await movieService.deleteMovie(movieId);
+      
+      if (response.success) {
+        setMovies(prev => prev.filter(movie => movie._id !== movieId));
+        setFilteredMovies(prev => prev.filter(movie => movie._id !== movieId));
+        toast.success('Movie deleted successfully');
+      } else {
+        toast.error(response.message || 'Failed to delete movie');
+      }
     } catch (error) {
-      console.error('Error deleting movie:', error);
-      toast.error('Failed to delete movie: ' + (error.message || 'Unknown error'));
+      // Silent error handling
+      toast.error('Error deleting movie');
     }
   };
 

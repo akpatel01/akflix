@@ -42,14 +42,13 @@ const Watched = () => {
               moviesData.push(response.data);
             }
           } catch (err) {
-            console.error(`Error fetching movie ${id}:`, err);
+            // Silent error handling
           }
         }
         
         setWatchedMovies(moviesData);
       } catch (err) {
         setError(err.message || 'Failed to load watch history');
-        console.error('Error fetching watched movies:', err);
       } finally {
         setIsLoading(false);
       }

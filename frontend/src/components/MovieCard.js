@@ -30,7 +30,6 @@ const MovieCard = ({ movie }) => {
   
   const handlePlayClick = (e) => {
     e.preventDefault();
-    console.log('Play clicked for movie:', movie.title, 'with ID:', movieId);
     navigate(`/watch/${movieId}`);
   };
   
@@ -70,7 +69,6 @@ const MovieCard = ({ movie }) => {
       }
     } catch (err) {
       toast.error(err.message || 'An error occurred');
-      console.error(err);
     }
   };
   

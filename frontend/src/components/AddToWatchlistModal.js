@@ -51,7 +51,6 @@ const AddToWatchlistModal = ({ isOpen, onClose, movie }) => {
       }
     } catch (err) {
       toast.error(err.message || 'An error occurred');
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }

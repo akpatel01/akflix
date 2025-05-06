@@ -15,19 +15,16 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        console.log('Home: Starting optimized data fetching...');
         
         // Make a single API call to get all movies
         // Using a higher limit to get most of the movies in one request
         const allMoviesResponse = await apiUtils.get('/movies', { limit: 150 });
         
         if (allMoviesResponse.success && Array.isArray(allMoviesResponse.data)) {
-          console.log('Home: Successfully fetched all movies:', allMoviesResponse.data.length);
           const allMovies = allMoviesResponse.data;
           
           // Extract featured movies
           const featuredMovies = allMovies.filter(movie => movie.isFeatured);
-          console.log('Home: Extracted featured movies:', featuredMovies.length);
           
           // Filter out items without valid backdrop images for the banner
           const validBannerMovies = featuredMovies.filter(
@@ -36,18 +33,15 @@ const Home = () => {
           
           if (validBannerMovies.length > 0) {
             setFeatured(validBannerMovies);
-            console.log('Home: Set featured movies with valid backdrops:', validBannerMovies.length);
           } else if (featuredMovies.length > 0) {
             // Fallback to featured items even if they don't have backdrop images
             setFeatured(featuredMovies);
-            console.log('Home: Set featured movies without filtering:', featuredMovies.length);
           } else {
             // If no featured movies found, use top rated or recent movies for banner
             const topMovies = [...allMovies]
               .sort((a, b) => (b.rating || 0) - (a.rating || 0))
               .slice(0, 5);
             setFeatured(topMovies);
-            console.log('Home: Using top rated movies for banner:', topMovies.length);
           }
           
           // Process movies by genre
@@ -75,15 +69,12 @@ const Home = () => {
             }))
             .slice(0, 6); // Limit to 6 categories
           
-          console.log('Home: Created categories from all movies:', categoriesData.length);
           setCategories(categoriesData);
         } else {
-          console.log('Home: API response invalid, using fallback data');
           // Use fallback data
           useFallbackData();
         }
       } catch (error) {
-        console.error('Home: Error fetching data:', error);
         // Use fallback data
         useFallbackData();
         setError('Failed to load from API, using fallback data');
@@ -93,7 +84,6 @@ const Home = () => {
     };
     
     const useFallbackData = () => {
-      console.log('Home: Using fallback data');
       // Set featured movies from fallback data
       const fallbackFeatured = fallbackMovies.filter(movie => movie.isFeatured);
       setFeatured(fallbackFeatured);
@@ -121,7 +111,6 @@ const Home = () => {
         }))
         .slice(0, 6); // Limit to 6 categories
       
-      console.log('Home: Created fallback categories:', fallbackCategories.length);
       setCategories(fallbackCategories);
       setUsingFallbackData(true);
     };

@@ -48,7 +48,7 @@ const Player = () => {
           toast.info(`"${movieTitle}" added to your watch history`, { autoClose: 2000 });
         }
       } catch (err) {
-        console.error('Error updating watched status:', err);
+        // Silent error handling
       }
     }
   }, [currentUser, updateUser, toast]);
@@ -127,7 +127,6 @@ const Player = () => {
           setRelatedContent(filtered);
         }
       } catch (error) {
-        console.error('Error fetching related content:', error);
         // Fallback to some random movies from the fallback data
         const filtered = fallbackMovies
           .filter(movie => movie._id !== id)
@@ -175,7 +174,6 @@ const Player = () => {
       }
     } catch (err) {
       toast.error(err.message || 'An error occurred');
-      console.error(err);
     }
   };
   

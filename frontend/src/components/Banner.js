@@ -28,7 +28,6 @@ const Banner = ({ movies = [], local = false }) => {
   // Filter movies to only include those with valid backdrop URLs
   useEffect(() => {
     if (!Array.isArray(movies)) {
-      console.error('Banner received non-array movies prop:', movies);
       setCurrentMovie(null);
       return;
     }

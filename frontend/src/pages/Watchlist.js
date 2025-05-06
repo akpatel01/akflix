@@ -42,14 +42,13 @@ const Watchlist = () => {
               moviesData.push(response.data);
             }
           } catch (err) {
-            console.error(`Error fetching movie ${id}:`, err);
+            // Silently handle individual movie fetch errors
           }
         }
         
         setWatchlistMovies(moviesData);
       } catch (err) {
         setError(err.message || 'Failed to load watchlist');
-        console.error('Error fetching watchlist:', err);
       } finally {
         setIsLoading(false);
       }

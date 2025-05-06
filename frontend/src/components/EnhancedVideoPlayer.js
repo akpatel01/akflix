@@ -231,7 +231,6 @@ const EnhancedVideoPlayer = ({ src, poster, title, subtitle }) => {
         videoRef.current.pause();
       } else {
         videoRef.current.play().catch(err => {
-          console.error('Error playing video:', err);
           setHasError(true);
         });
       }
@@ -339,14 +338,14 @@ const EnhancedVideoPlayer = ({ src, poster, title, subtitle }) => {
     
     if (!isFullscreen) {
       if (playerRef.current.requestFullscreen) {
-        playerRef.current.requestFullscreen().catch(err => {
-          console.error('Error attempting to enable fullscreen:', err);
+        playerRef.current.requestFullscreen().catch(() => {
+          // Silently handle fullscreen error
         });
       }
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch(err => {
-          console.error('Error attempting to exit fullscreen:', err);
+        document.exitFullscreen().catch(() => {
+          // Silently handle exit fullscreen error
         });
       }
     }

@@ -22,7 +22,6 @@ const CategoryList = ({ title = 'Categories', compact = false, maxCategories = 0
           setError('Failed to load categories');
         }
       } catch (err) {
-        console.error('Error fetching categories:', err);
         setError('An error occurred while fetching categories');
       } finally {
         setIsLoading(false);

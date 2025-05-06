@@ -30,7 +30,6 @@ const SearchResults = () => {
           setError(response.message || 'Search failed');
         }
       } catch (error) {
-        console.error('Error searching movies:', error);
         setError('An error occurred while searching');
       } finally {
         setLoading(false);

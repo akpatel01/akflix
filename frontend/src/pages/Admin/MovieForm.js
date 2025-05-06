@@ -38,7 +38,6 @@ const MovieForm = () => {
         const genres = await movieService.getGenres();
         setAllGenres(genres);
       } catch (error) {
-        console.error('Error fetching genres:', error);
         // Fallback to empty array if fetch fails
         setAllGenres([]);
       }
@@ -50,17 +49,14 @@ const MovieForm = () => {
   useEffect(() => {
     if (id) {
       setIsEditMode(true);
-      console.log('Fetching movie with ID:', id);
       
       const fetchMovie = async () => {
+        setLoading(true);
         try {
-          setLoading(true);
           const response = await movieService.getMovie(id);
-          console.log('Movie fetch response:', response);
           
-          if (response.success && response.data) {
+          if (response.success) {
             const movie = response.data;
-            console.log('Setting form data with movie:', movie);
             setFormData({
               ...movie,
               actors: movie.actors || [],
@@ -68,12 +64,10 @@ const MovieForm = () => {
             setPosterPreview(movie.poster);
             setBackdropPreview(movie.backdrop);
           } else {
-            console.error('Movie not found in response:', response);
             toast.error('Movie not found');
             navigate('/admin/movies');
           }
         } catch (error) {
-          console.error('Failed to fetch movie:', error);
           toast.error('Failed to fetch movie: ' + (error.message || 'Unknown error'));
           navigate('/admin/movies');
         } finally {
@@ -183,43 +177,28 @@ const MovieForm = () => {
     }
     
     setLoading(true);
-    console.log('Submitting form with data:', formData);
-    console.log('Is Edit Mode:', isEditMode, 'ID:', id);
     
     try {
-      // Create a copy of the form data to avoid modifying the state directly
-      const movieData = { ...formData };
-      
-      // If there's an _id field and we're creating a new movie, remove it
-      if (!isEditMode && movieData._id) {
-        delete movieData._id;
-      }
+      let response;
       
       if (isEditMode) {
-        console.log('Updating movie with ID:', id);
-        const response = await movieService.updateMovie(id, movieData);
-        console.log('Update response:', response);
+        response = await movieService.updateMovie(id, formData);
         if (response.success) {
           toast.success('Movie updated successfully');
           navigate('/admin/movies');
         } else {
-          console.error('Failed to update movie:', response);
           toast.error(response.message || 'Failed to update movie');
         }
       } else {
-        console.log('Creating new movie');
-        const response = await movieService.createMovie(movieData);
-        console.log('Create response:', response);
+        response = await movieService.createMovie(formData);
         if (response.success) {
           toast.success('Movie added successfully');
           navigate('/admin/movies');
         } else {
-          console.error('Failed to create movie:', response);
           toast.error(response.message || 'Failed to add movie');
         }
       }
     } catch (error) {
-      console.error('Error saving movie:', error);
       toast.error('An error occurred: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);

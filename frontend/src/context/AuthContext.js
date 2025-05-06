@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }) => {
             setCurrentUser(null);
           }
         } catch (err) {
-          console.error('Auth check error:', err);
           // If there's an error, log user out
           authService.logout();
           setCurrentUser(null);
