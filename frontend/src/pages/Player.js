@@ -23,7 +23,6 @@ const Player = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showWatchlistConfirm, setShowWatchlistConfirm] = useState(false);
   const [hasMarkedAsWatched, setHasMarkedAsWatched] = useState(false);
-  const [secureVideoUrl, setSecureVideoUrl] = useState(null);
   
   const handleUpdateWatched = useCallback(async (movieId, movieTitle) => {
     if (!currentUser) return;
@@ -62,10 +61,6 @@ const Player = () => {
         
         if (response.success && response.data) {
           setContent(response.data);
-          // Try to get a secure video URL if authenticated
-          if (currentUser) {
-            await fetchSecureVideoUrl(id);
-          }
         } else {
           // If API fails, look for the content in our fallback data
           findInFallbackData();
@@ -100,22 +95,7 @@ const Player = () => {
     };
     
     fetchContent();
-  }, [id, currentUser]);
-  
-  // Simple function to fetch secure video URL
-  const fetchSecureVideoUrl = async (movieId) => {
-    try {
-      const response = await movieService.getSecureVideoUrl(movieId);
-      
-      if (response.success && response.data) {
-        setSecureVideoUrl(response.data.secureUrl);
-      } else {
-        console.log('Secure video URL not available, using standard URL');
-      }
-    } catch (error) {
-      console.error('Error fetching secure video URL:', error);
-    }
-  };
+  }, [id]);
   
   // Separate effect for updating watched status
   useEffect(() => {
@@ -200,10 +180,8 @@ const Player = () => {
     );
   }
   
-  // Get video source (prioritize secure URL if available)
-  const videoSource = secureVideoUrl || 
-                     (content && content.videoUrl) || 
-                     'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
+  // Get video source directly from content
+  const videoSource = content.videoUrl || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
   
   return (
     <div className="relative bg-black">

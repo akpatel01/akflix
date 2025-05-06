@@ -176,17 +176,6 @@ const movieService = {
     } catch (error) {
       throw error;
     }
-  },
-
-  // Get secure video URL for a movie - simplified version
-  getSecureVideoUrl: async (id) => {
-    try {
-      if (!id) return { success: false };
-      return await apiUtils.get(`/movies/${id}/secure-video`);
-    } catch (error) {
-      console.error('Error fetching secure video URL:', error);
-      return { success: false };
-    }
   }
 };
 
