@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSwipeable } from 'react-swipeable';
 
 const Banner = ({ movies = [], local = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentMovie, setCurrentMovie] = useState(null);
+  const [isSwiping, setIsSwiping] = useState(false);
+  
+  // Swipe handlers
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (!movies || movies.length <= 1) return;
+      setCurrentIndex((prev) => (prev + 1) % movies.length);
+    },
+    onSwipedRight: () => {
+      if (!movies || movies.length <= 1) return;
+      setCurrentIndex((prev) => (prev - 1 + movies.length) % movies.length);
+    },
+    onSwiping: () => setIsSwiping(true),
+    onSwiped: () => setIsSwiping(false),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: false
+  });
   
   // Filter movies to only include those with valid backdrop URLs
   useEffect(() => {
@@ -57,10 +75,15 @@ const Banner = ({ movies = [], local = false }) => {
   }
 
   return (
-    <div className="relative w-full h-[550px] overflow-hidden">
+    <div 
+      className="relative w-full h-[550px] overflow-hidden"
+      {...handlers}
+    >
       {/* Backdrop Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-300 ${
+          isSwiping ? 'scale-[1.02]' : ''
+        }`}
         style={{ 
           backgroundImage: backdropUrl ? `url(${backdropUrl})` : 'none',
           backgroundPosition: 'center 20%',
@@ -69,6 +92,23 @@ const Banner = ({ movies = [], local = false }) => {
       >
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+      </div>
+      
+      {/* Swipe Indicators */}
+      <div className={`absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/20 to-transparent opacity-0 transition-opacity duration-300 ${
+        isSwiping ? 'opacity-100' : ''
+      }`}>
+        <div className="h-full flex items-center justify-center text-white/50">
+          <i className="fas fa-chevron-left"></i>
+        </div>
+      </div>
+      
+      <div className={`absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black/20 to-transparent opacity-0 transition-opacity duration-300 ${
+        isSwiping ? 'opacity-100' : ''
+      }`}>
+        <div className="h-full flex items-center justify-center text-white/50">
+          <i className="fas fa-chevron-right"></i>
+        </div>
       </div>
       
       {/* Content */}
