@@ -6,6 +6,14 @@ import movieService from '../services/movieService';
 import { useToast } from '../context/ToastContext';
 import AlertModal from '../components/AlertModal';
 
+// Preset profile picture options
+const profilePicOptions = [
+  'https://i.pravatar.cc/150?img=12',
+  'https://i.pravatar.cc/150?img=33',
+  'https://i.pravatar.cc/150?img=48',
+  'https://i.pravatar.cc/150?img=65'
+];
+
 const Profile = () => {
   const { currentUser, logout, updateProfile, updateUser } = useAuth();
   const toast = useToast();
@@ -116,10 +124,10 @@ const Profile = () => {
     });
   };
   
-  const handleProfilePicSelect = (pic) => {
+  const handleProfilePicSelect = (picUrl) => {
     setFormData({
       ...formData,
-      profilePic: pic
+      profilePic: picUrl
     });
   };
   
@@ -257,38 +265,33 @@ const Profile = () => {
   }
   
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Profile</h1>
+    <div className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Profile</h1>
       
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 md:col-span-3">
-          <div className="bg-gray-900 rounded-lg p-6 shadow-lg">
+          <div className="bg-gray-900 rounded-lg p-4 shadow-lg">
             <div className="flex flex-col items-center">
-              <div className="w-24 h-24 rounded-full bg-gray-700 overflow-hidden">
-                {currentUser.profilePic ? (
+              <div className="w-24 h-24 rounded-full bg-gray-700 overflow-hidden border-4 border-netflix-red transition-all hover:scale-105">
+                {formData.profilePic ? (
                   <img 
-                    src={currentUser.profilePic} 
-                    alt={currentUser.username} 
+                    src={formData.profilePic} 
+                    alt={formData.username} 
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
-                    {currentUser.username?.charAt(0).toUpperCase() || 'U'}
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <i className="fas fa-user text-4xl"></i>
                   </div>
                 )}
               </div>
-              
-              <h2 className="mt-4 text-xl font-bold">{currentUser.username}</h2>
-              <p className="text-gray-400">{currentUser.email}</p>
-              
+              <h2 className="mt-3 text-xl font-bold">{formData.username}</h2>
+              <p className="text-gray-400">{formData.email}</p>
               {currentUser.role === 'admin' && (
-                <span className="px-2 py-1 bg-netflix-red rounded text-xs mt-2">
-                  Admin
-                </span>
+                <span className="px-2 py-1 bg-netflix-red rounded text-xs mt-2">Admin</span>
               )}
             </div>
-            
-            <div className="mt-8 space-y-2">
+            <div className="mt-6 space-y-1">
               <button
                 onClick={() => setActiveTab('profile')}
                 className={`w-full text-left px-4 py-2 rounded ${
@@ -344,7 +347,7 @@ const Profile = () => {
         </div>
         
         <div className="col-span-12 md:col-span-9">
-          <div className="bg-gray-900 rounded-lg p-6 shadow-lg">
+          <div className="bg-gray-900 rounded-lg p-4 shadow-lg">
             {error && (
               <div className="bg-red-600 text-white p-3 rounded mb-4">
                 {error}
@@ -359,70 +362,65 @@ const Profile = () => {
             
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-xl font-bold mb-6">Edit Profile</h2>
-                
+                <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
                 <form onSubmit={handleProfileUpdate}>
-                  <div className="mb-4">
-                    <label htmlFor="username" className="block text-gray-300 mb-2">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      id="username"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-800 text-white p-3 rounded"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="mb-6">
-                    <label htmlFor="email" className="block text-gray-300 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full bg-gray-800 text-white p-3 rounded"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="mb-6">
-                    <label className="block text-gray-300 mb-3">
-                      Profile Picture
-                    </label>
-                    <div className="grid grid-cols-4 gap-4">
-                      {[
-                        '/avatars/avatar1.png',
-                        '/avatars/avatar2.png',
-                        '/avatars/avatar3.png',
-                        '/avatars/avatar4.png',
-                      ].map((pic) => (
-                        <div
-                          key={pic}
-                          onClick={() => handleProfilePicSelect(pic)}
-                          className={`rounded-lg overflow-hidden cursor-pointer border-2 ${
-                            formData.profilePic === pic 
-                              ? 'border-netflix-red' 
-                              : 'border-transparent'
-                          }`}
-                        >
-                          <img
-                            src={pic}
-                            alt="Avatar option"
-                            className="w-full h-auto"
-                          />
-                        </div>
-                      ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="username" className="block text-gray-300 mb-1">Username</label>
+                        <input
+                          type="text"
+                          id="username"
+                          name="username"
+                          value={formData.username}
+                          onChange={handleInputChange}
+                          className="w-full bg-gray-800 text-white p-3 rounded"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="email" className="block text-gray-300 mb-1">Email</label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="w-full bg-gray-800 text-white p-3 rounded"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <label className="block text-gray-300 mb-3 text-center">Choose Profile Picture</label>
+                      <div className="grid grid-cols-4 gap-2 max-w-[200px] mx-auto">
+                        {profilePicOptions.map((pic, index) => (
+                          <div 
+                            key={index}
+                            onClick={() => handleProfilePicSelect(pic)}
+                            className={`w-10 h-10 rounded-full overflow-hidden cursor-pointer transition-all ${
+                              formData.profilePic === pic ? 'ring-2 ring-netflix-red scale-110' : 'opacity-70 hover:opacity-100'
+                            }`}
+                          >
+                            {pic ? (
+                              <img 
+                                src={pic} 
+                                alt={`Profile option ${index + 1}`} 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-700 text-gray-400">
+                                <i className="fas fa-user"></i>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-end">
+
+                  <div className="flex justify-end mt-4">
                     <button
                       type="submit"
                       className="bg-netflix-red text-white px-6 py-2 rounded font-bold hover:bg-red-700 disabled:opacity-50"
@@ -437,11 +435,11 @@ const Profile = () => {
             
             {activeTab === 'security' && (
               <div>
-                <h2 className="text-xl font-bold mb-6">Security</h2>
+                <h2 className="text-xl font-bold mb-4">Security</h2>
                 
                 <form onSubmit={handlePasswordUpdate}>
                   <div className="mb-4">
-                    <label htmlFor="currentPassword" className="block text-gray-300 mb-2">
+                    <label htmlFor="currentPassword" className="block text-gray-300 mb-1">
                       Current Password
                     </label>
                     <input
@@ -456,7 +454,7 @@ const Profile = () => {
                   </div>
                   
                   <div className="mb-4">
-                    <label htmlFor="newPassword" className="block text-gray-300 mb-2">
+                    <label htmlFor="newPassword" className="block text-gray-300 mb-1">
                       New Password
                     </label>
                     <input
@@ -470,8 +468,8 @@ const Profile = () => {
                     />
                   </div>
                   
-                  <div className="mb-6">
-                    <label htmlFor="confirmPassword" className="block text-gray-300 mb-2">
+                  <div className="mb-4">
+                    <label htmlFor="confirmPassword" className="block text-gray-300 mb-1">
                       Confirm New Password
                     </label>
                     <input
@@ -500,27 +498,27 @@ const Profile = () => {
             
             {activeTab === 'watchlist' && (
               <div>
-                <h2 className="text-xl font-bold mb-6">My Watchlist</h2>
+                <h2 className="text-xl font-bold mb-4">My Watchlist</h2>
                 
                 {isContentLoading ? (
-                  <div className="flex justify-center py-12">
+                  <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-netflix-red"></div>
                   </div>
                 ) : watchlistItems.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-8">
                     <p className="text-gray-400">Your watchlist is empty.</p>
                     <p className="text-gray-500 mt-2">
                       Add movies or TV shows by clicking the + button on any title.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {watchlistItems.map((item) => (
                       <div
                         key={item._id}
-                        className="bg-gray-800 rounded-lg p-4 flex items-start"
+                        className="bg-gray-800 rounded-lg p-3 flex items-start"
                       >
-                        <div className="w-20 h-28 flex-shrink-0 rounded overflow-hidden mr-4">
+                        <div className="w-20 h-28 flex-shrink-0 rounded overflow-hidden mr-3">
                           <img 
                             src={item.poster} 
                             alt={item.title} 
@@ -533,7 +531,7 @@ const Profile = () => {
                           <p className="text-gray-400 text-sm">{item.year} • {item.duration}</p>
                           <p className="text-gray-400 text-sm mb-2">{item.genres.join(', ')}</p>
                           
-                          <div className="flex space-x-3">
+                          <div className="flex space-x-2">
                             <button
                               onClick={() => navigate(`/watch/${item._id}`)}
                               className="text-white bg-netflix-red px-3 py-1 rounded text-sm hover:bg-red-700"
@@ -558,27 +556,27 @@ const Profile = () => {
             
             {activeTab === 'watched' && (
               <div>
-                <h2 className="text-xl font-bold mb-6">Watch History</h2>
+                <h2 className="text-xl font-bold mb-4">Watch History</h2>
                 
                 {isContentLoading ? (
-                  <div className="flex justify-center py-12">
+                  <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-netflix-red"></div>
                   </div>
                 ) : watchedItems.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-8">
                     <p className="text-gray-400">Your watch history is empty.</p>
                     <p className="text-gray-500 mt-2">
                       Movies and TV shows you've watched will appear here.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {watchedItems.map((item) => (
                       <div
                         key={item._id}
-                        className="bg-gray-800 rounded-lg p-4 flex items-start"
+                        className="bg-gray-800 rounded-lg p-3 flex items-start"
                       >
-                        <div className="w-20 h-28 flex-shrink-0 rounded overflow-hidden mr-4">
+                        <div className="w-20 h-28 flex-shrink-0 rounded overflow-hidden mr-3">
                           <img 
                             src={item.poster} 
                             alt={item.title} 
@@ -591,7 +589,7 @@ const Profile = () => {
                           <p className="text-gray-400 text-sm">{item.year} • {item.duration}</p>
                           <p className="text-gray-400 text-sm mb-2">{item.genres.join(', ')}</p>
                           
-                          <div className="flex space-x-3">
+                          <div className="flex space-x-2">
                             <button
                               onClick={() => navigate(`/watch/${item._id}`)}
                               className="text-white bg-netflix-red px-3 py-1 rounded text-sm hover:bg-red-700"
