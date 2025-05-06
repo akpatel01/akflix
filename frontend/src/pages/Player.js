@@ -23,6 +23,9 @@ const Player = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showWatchlistConfirm, setShowWatchlistConfirm] = useState(false);
   const [hasMarkedAsWatched, setHasMarkedAsWatched] = useState(false);
+  const [secureVideoUrl, setSecureVideoUrl] = useState(null);
+  const [videoUrlExpiry, setVideoUrlExpiry] = useState(null);
+  const [videoError, setVideoError] = useState(false);
   
   const handleUpdateWatched = useCallback(async (movieId, movieTitle) => {
     if (!currentUser) return;
@@ -61,6 +64,10 @@ const Player = () => {
         
         if (response.success && response.data) {
           setContent(response.data);
+          // Try to get a secure video URL if authenticated
+          if (currentUser) {
+            await fetchSecureVideoUrl(id);
+          }
         } else {
           // If API fails, look for the content in our fallback data
           findInFallbackData();
@@ -95,7 +102,46 @@ const Player = () => {
     };
     
     fetchContent();
-  }, [id]);
+  }, [id, currentUser]);
+  
+  // Function to fetch secure video URL
+  const fetchSecureVideoUrl = async (movieId) => {
+    try {
+      const response = await movieService.getSecureVideoUrl(movieId);
+      
+      if (response.success && response.data) {
+        setSecureVideoUrl(response.data.secureUrl);
+        setVideoUrlExpiry(response.data.expiresAt);
+        setVideoError(false);
+      } else {
+        // If we can't get secure URL, we'll fall back to the regular URL
+        setVideoError(true);
+        toast.error('Unable to obtain secure video access');
+      }
+    } catch (error) {
+      console.error('Error fetching secure video URL:', error);
+      setVideoError(true);
+    }
+  };
+  
+  // Refresh secure URL if it's about to expire
+  useEffect(() => {
+    if (!videoUrlExpiry || !currentUser) return;
+    
+    // Convert expiry to milliseconds and subtract current time
+    const expiryTime = new Date(videoUrlExpiry * 1000);
+    const currentTime = new Date();
+    const timeUntilExpiry = expiryTime - currentTime;
+    
+    // If URL expires in less than 5 minutes, set a timer to refresh it
+    if (timeUntilExpiry > 0 && timeUntilExpiry < 5 * 60 * 1000) {
+      const refreshTimer = setTimeout(() => {
+        fetchSecureVideoUrl(id);
+      }, timeUntilExpiry - 60000); // Refresh 1 minute before expiry
+      
+      return () => clearTimeout(refreshTimer);
+    }
+  }, [videoUrlExpiry, id, currentUser]);
   
   // Separate effect for updating watched status
   useEffect(() => {
@@ -180,8 +226,10 @@ const Player = () => {
     );
   }
   
-  // Get video source (if available)
-  const videoSource = content.videoUrl || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
+  // Get video source (prioritize secure URL if available)
+  const videoSource = secureVideoUrl || 
+                     (content && content.videoUrl) || 
+                     'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
   
   return (
     <div className="relative bg-black">
@@ -189,6 +237,19 @@ const Player = () => {
         <div className="bg-yellow-500/20 text-yellow-300 py-2 px-4 text-center">
           <i className="fas fa-info-circle mr-2"></i>
           Using preview data. Some features may be limited.
+        </div>
+      )}
+      
+      {!currentUser && !usingFallbackData && (
+        <div className="bg-blue-500/20 text-blue-300 py-2 px-4 text-center">
+          <i className="fas fa-info-circle mr-2"></i>
+          Sign in for higher quality video and additional features.
+          <button 
+            onClick={() => setShowLoginModal(true)}
+            className="ml-2 underline"
+          >
+            Sign in
+          </button>
         </div>
       )}
       
