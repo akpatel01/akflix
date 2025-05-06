@@ -46,31 +46,31 @@ const SearchResults = () => {
   }, [query]);
   
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-semibold mb-8">
+    <div className="p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-8">
         Search results for: <span className="text-netflix-red">{query}</span>
       </h1>
       
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="text-netflix-red text-2xl">
+        <div className="flex justify-center items-center h-48 sm:h-64">
+          <div className="text-netflix-red text-xl sm:text-2xl">
             <i className="fas fa-spinner fa-spin mr-2"></i> Loading...
           </div>
         </div>
       ) : error ? (
-        <div className="text-center py-10">
-          <p className="text-xl text-red-500 mb-4">{error}</p>
-          <p className="text-gray-500 mt-2">Please try again later</p>
+        <div className="text-center py-8 sm:py-10">
+          <p className="text-lg sm:text-xl text-red-500 mb-4">{error}</p>
+          <p className="text-sm sm:text-base text-gray-500 mt-2">Please try again later</p>
         </div>
       ) : results.length === 0 ? (
-        <div className="text-center py-10">
-          <p className="text-xl text-gray-400">No results found for "{query}"</p>
-          <p className="text-gray-500 mt-2">Try a different search term</p>
+        <div className="text-center py-8 sm:py-10">
+          <p className="text-lg sm:text-xl text-gray-400">No results found for "{query}"</p>
+          <p className="text-sm sm:text-base text-gray-500 mt-2">Try a different search term</p>
         </div>
       ) : (
         <>
-          <p className="mb-4 text-lg">{results.length} results found</p>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
+          <p className="mb-4 text-base sm:text-lg">{results.length} results found</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
             {results.map(result => (
               <div key={result._id} className="aspect-[2/3]">
                 <MovieCard movie={result} />

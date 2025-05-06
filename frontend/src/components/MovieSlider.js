@@ -40,10 +40,10 @@ const MovieSlider = ({ title, movies }) => {
       <div className="relative overflow-hidden">
         <div 
           ref={sliderTrackRef} 
-          className="flex gap-4 transition-transform duration-500 ease-in-out p-1"
+          className="flex gap-2 sm:gap-4 transition-transform duration-500 ease-in-out p-1"
         >
           {movies.map((movie) => (
-            <div key={movie.id} className="flex-none w-[220px] aspect-[2/3]">
+            <div key={movie.id} className="flex-none w-[160px] sm:w-[220px] aspect-[2/3]">
               <MovieCard movie={movie} />
             </div>
           ))}

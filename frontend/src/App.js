@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import MobileNavigation from './components/MobileNavigation';
 import Home from './pages/Home';
 import Movies from './pages/Movies';
 import TVShows from './pages/TVShows';
@@ -123,11 +124,14 @@ function App() {
           <>
             <Header toggleSidebar={toggleSidebar} />
             <div className="flex h-screen">
-              <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-              <main className="flex-1 lg:ml-16 pt-16 pb-20 lg:pb-0 overflow-y-auto bg-black">
-                <AppContent />
+              <Sidebar />
+              <main className="flex-1 pt-16 pb-20 lg:ml-16 lg:pb-0 overflow-y-auto bg-black">
+                <div className="w-full">
+                  <AppContent />
+                </div>
               </main>
             </div>
+            <MobileNavigation />
           </>
         )}
       </ToastProvider>

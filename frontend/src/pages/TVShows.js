@@ -111,20 +111,20 @@ const TVShows = () => {
   }
   
   return (
-    <div className="p-8">
-      <h1 className="text-3xl mb-8">TV Shows</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl mb-4 sm:mb-8">TV Shows</h1>
       
       {usingFallbackData && (
-        <div className="mb-4 p-2 bg-yellow-500/20 text-yellow-300 rounded">
+        <div className="mb-4 p-2 bg-yellow-500/20 text-yellow-300 rounded text-sm sm:text-base">
           Note: Using local data. Some features may be limited.
         </div>
       )}
       
-      <div className="flex items-center gap-4 mb-8 flex-wrap">
+      <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8 flex-wrap">
         {genres.map(genre => (
           <button
             key={genre}
-            className={`border-none rounded-full py-2 px-4 text-sm cursor-pointer transition-all duration-200
+            className={`border-none rounded-full py-1.5 sm:py-2 px-3 sm:px-4 text-xs sm:text-sm cursor-pointer transition-all duration-200
             ${filter === genre 
               ? 'bg-netflix-red hover:bg-netflix-red-hover' 
               : 'bg-white/10 hover:bg-white/20'}`}
@@ -148,11 +148,11 @@ const TVShows = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
           {filterShows().map(show => (
             <div key={show._id} className="aspect-[2/3]">
               <MovieCard movie={show} />
-              <div className="mt-2 text-sm text-center text-netflix-light-gray">{show.year}</div>
+              <div className="mt-1 sm:mt-2 text-xs sm:text-sm text-center text-netflix-light-gray">{show.year}</div>
             </div>
           ))}
         </div>

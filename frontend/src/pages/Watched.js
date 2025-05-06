@@ -59,27 +59,27 @@ const Watched = () => {
   }, [currentUser, navigate]);
   
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-semibold mb-8">Watch History</h1>
+    <div className="p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-8">Watch History</h1>
       
       {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-netflix-red"></div>
+        <div className="flex justify-center items-center py-16 sm:py-20">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-netflix-red"></div>
         </div>
       ) : error ? (
-        <div className="text-center py-10">
-          <p className="text-xl text-red-500 mb-4">Error loading watch history</p>
-          <p className="text-gray-400">{error}</p>
+        <div className="text-center py-8 sm:py-10">
+          <p className="text-lg sm:text-xl text-red-500 mb-4">Error loading watch history</p>
+          <p className="text-sm sm:text-base text-gray-400">{error}</p>
         </div>
       ) : watchedMovies.length === 0 ? (
-        <div className="text-center py-10">
-          <p className="text-xl text-gray-400">Your watch history is empty.</p>
-          <p className="text-gray-500 mt-2">
+        <div className="text-center py-8 sm:py-10">
+          <p className="text-lg sm:text-xl text-gray-400">Your watch history is empty.</p>
+          <p className="text-sm sm:text-base text-gray-500 mt-2">
             Movies and TV shows you've watched will appear here.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
           {watchedMovies.map(item => (
             <div key={item._id} className="aspect-[2/3]">
               <MovieCard movie={item} />

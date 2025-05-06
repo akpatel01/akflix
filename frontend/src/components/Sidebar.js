@@ -11,18 +11,16 @@ const MenuItem = ({ to, icon, children, onClick, isActive, showTooltip = true })
       to={to}
       onClick={onClick}
       className={({ isActive }) => 
-        `flex items-center justify-center transition-all duration-200 relative group
-         ${isActive 
-          ? 'text-white' 
-          : 'text-gray-500 hover:text-white'}`
+        `flex items-center justify-center transition-all duration-300 relative group w-full h-12
+         ${isActive ? 'text-white' : 'text-gray-500 hover:text-white'}`
       }
     >
       <div className="relative flex items-center justify-center w-full h-full">
-        <i className={`${icon} text-xl group-hover:text-white transition-colors
+        <i className={`${icon} text-xl group-hover:text-white transition-colors duration-300
                       ${isActive ? 'text-white' : ''}`}></i>
         {showTooltip && (
           <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
-                         pointer-events-none bg-black/90 py-1.5 px-3 rounded-sm transition-opacity duration-200 z-50">
+                         pointer-events-none bg-black/90 py-2 px-4 rounded transition-opacity duration-300 z-50">
             {children}
           </span>
         )}
@@ -57,7 +55,7 @@ const genreIcons = {
 // Default icon for genres without a specific mapping
 const defaultIcon = 'fas fa-film';
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = () => {
   const location = useLocation();
   const { currentUser, isAdmin } = useAuth();
   const [categories, setCategories] = useState([]);
@@ -87,19 +85,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     fetchCategories();
   }, []);
   
-  const handleMenuItemClick = () => {
-    // Close sidebar on mobile when a menu item is clicked
-    if (window.innerWidth < 1024) {
-      toggleSidebar();
-    }
-  };
-  
   // Get icon for a genre
   const getGenreIcon = (genreName) => {
     return genreIcons[genreName] || defaultIcon;
   };
   
-  // Define navigation items
+  // Define main navigation items
   const navigationItems = [
     { to: "/", icon: "fas fa-home", label: "Home" },
     { to: "/search", icon: "fas fa-search", label: "Search" },
@@ -108,63 +99,48 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { to: "/categories", icon: "fas fa-th-large", label: "Categories" }
   ];
 
-  // Add conditional items
+  // Add My List to main navigation if user is logged in
   if (currentUser) {
     navigationItems.push({ to: "/watchlist", icon: "fas fa-plus", label: "My List" });
-    navigationItems.push({ to: "/profile", icon: "fas fa-user", label: "Profile" });
+  }
+
+  // Define bottom navigation items separately
+  const bottomNavigationItems = [];
+  if (currentUser) {
+    bottomNavigationItems.push({ to: "/profile", icon: "fas fa-user", label: "Profile" });
   }
   if (isAdmin) {
-    navigationItems.push({ to: "/admin", icon: "fas fa-cog", label: "Admin" });
+    bottomNavigationItems.push({ to: "/admin", icon: "fas fa-cog", label: "Admin" });
   }
   
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="fixed top-0 left-0 h-full w-16 py-0 z-[900] bg-black hidden lg:flex flex-col items-center">
-        <div className="flex flex-col items-center w-full h-full pt-0 pb-8">
-          {/* Logo */}
-          <Link to="/" className="flex items-center justify-center h-16 w-full">
-            <div className="text-white flex items-center justify-center font-bold text-2xl">
-              A
-            </div>
-          </Link>
-          
-          {/* Main Navigation */}
-          <div className="w-full flex flex-col items-center space-y-5 mt-8">
-            {navigationItems.map((item) => (
-              <MenuItem 
-                key={item.to} 
-                to={item.to} 
-                icon={item.icon} 
-                onClick={handleMenuItemClick}
-              >
-                {item.label}
-              </MenuItem>
+    <aside className="fixed top-0 left-0 h-full w-16 py-4 z-[900] bg-black hidden lg:flex flex-col items-center">
+      <div className="flex flex-col items-center w-full h-full">
+        {/* Logo */}
+        <Link to="/" className="flex items-center justify-center h-16 w-full mb-8">
+          <div className="text-white flex items-center justify-center font-bold text-2xl">
+            A
+          </div>
+        </Link>
+        
+        {/* Main Navigation */}
+        <nav className="w-full flex-1 flex flex-col items-center">
+          {/* Top Navigation Items */}
+          <div className="w-full flex flex-col items-center space-y-8">
+            {navigationItems.map((item, index) => (
+              <MenuItem key={index} to={item.to} icon={item.icon}>{item.label}</MenuItem>
             ))}
           </div>
-        </div>
-      </aside>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-black z-[900] lg:hidden">
-        <div className="grid grid-cols-8 h-full">
-          {navigationItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={handleMenuItemClick}
-              className={({ isActive }) => 
-                `flex flex-col items-center justify-center text-center px-0.5
-                 ${isActive ? 'text-white' : 'text-gray-500 hover:text-white'}`
-              }
-            >
-              <i className={`${item.icon} text-[16px] mb-0.5`}></i>
-              <span className="text-[8px] leading-tight truncate w-full">{item.label}</span>
-            </NavLink>
-          ))}
-        </div>
+          {/* Bottom Navigation Items (Profile & Admin) */}
+          <div className="w-full flex flex-col items-center space-y-8 mt-auto mb-8">
+            {bottomNavigationItems.map((item, index) => (
+              <MenuItem key={index} to={item.to} icon={item.icon}>{item.label}</MenuItem>
+            ))}
+          </div>
+        </nav>
       </div>
-    </>
+    </aside>
   );
 };
 

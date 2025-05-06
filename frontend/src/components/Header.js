@@ -127,9 +127,9 @@ const Header = ({ toggleSidebar }) => {
   }, [currentUser?.profilePic]);
 
   return (
-    <header className="fixed top-0 left-16 right-0 h-16 bg-black flex items-center justify-between px-12 z-[900]">
+    <header className="fixed top-0 left-0 lg:left-16 right-0 h-16 bg-black flex items-center justify-between px-4 sm:px-8 lg:px-12 z-[900]">
       <div className="flex items-center">
-        <Link to="/" className="text-white text-[28px] font-bold tracking-wider">
+        <Link to="/" className="text-white text-[24px] sm:text-[28px] font-bold tracking-wider">
           AKFLIX
         </Link>
       </div>
