@@ -17,15 +17,15 @@ const MobileNavigation = () => {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-black z-[900] border-t border-zinc-800">
-      <div className={`grid grid-cols-${navigationItems.length} h-full`}>
+      <div className="flex justify-between items-center h-full px-2">
         {navigationItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) => 
-              `flex flex-col items-center justify-center text-center px-1 relative
+              `flex flex-col items-center justify-center text-center px-1 relative flex-1
                ${isActive 
-                 ? 'text-white after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-6 after:h-0.5 after:bg-netflix-red' 
+                 ? 'text-white' 
                  : 'text-gray-500 hover:text-white'}`
             }
           >

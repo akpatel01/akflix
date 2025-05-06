@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Banner from '../components/Banner';
 import MovieSlider from '../components/MovieSlider';
-import movieService from '../services/movieService';
 import fallbackMovies from '../data/movies.json'; // Import fallback data
 import apiUtils from '../utils/apiUtils';
 
@@ -16,102 +15,90 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        console.log('Home: Starting optimized data fetching...');
         
-        // Fetch featured movies for the banner
-        console.log('Home: Fetching featured movies...');
-        const featuredResponse = await apiUtils.get('/movies/featured');
-        console.log('Home: Received featured response:', featuredResponse);
+        // Make a single API call to get all movies
+        // Using a higher limit to get most of the movies in one request
+        const allMoviesResponse = await apiUtils.get('/movies', { limit: 150 });
         
-        // Fetch genres to get their respective movies
-        console.log('Home: Fetching categories...');
-        const categoriesResponse = await apiUtils.get('/movies/categories');
-        console.log('Home: Received categories response:', categoriesResponse);
-        
-        if (featuredResponse.success && Array.isArray(featuredResponse.data)) {
-          console.log('Home: Processing featured data...');
+        if (allMoviesResponse.success && Array.isArray(allMoviesResponse.data)) {
+          console.log('Home: Successfully fetched all movies:', allMoviesResponse.data.length);
+          const allMovies = allMoviesResponse.data;
+          
+          // Extract featured movies
+          const featuredMovies = allMovies.filter(movie => movie.isFeatured);
+          console.log('Home: Extracted featured movies:', featuredMovies.length);
+          
           // Filter out items without valid backdrop images for the banner
-          const validBannerMovies = featuredResponse.data.filter(
+          const validBannerMovies = featuredMovies.filter(
             movie => movie && movie.backdrop && movie.backdrop.trim() !== ''
           );
           
           if (validBannerMovies.length > 0) {
             setFeatured(validBannerMovies);
             console.log('Home: Set featured movies with valid backdrops:', validBannerMovies.length);
+          } else if (featuredMovies.length > 0) {
+            // Fallback to featured items even if they don't have backdrop images
+            setFeatured(featuredMovies);
+            console.log('Home: Set featured movies without filtering:', featuredMovies.length);
           } else {
-            // Fallback to items even if they don't have backdrop images
-            setFeatured(featuredResponse.data);
-            console.log('Home: Set featured movies without filtering:', featuredResponse.data.length);
+            // If no featured movies found, use top rated or recent movies for banner
+            const topMovies = [...allMovies]
+              .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+              .slice(0, 5);
+            setFeatured(topMovies);
+            console.log('Home: Using top rated movies for banner:', topMovies.length);
           }
-        } else {
-          // Use fallback data
-          console.log('Home: Using fallback featured data');
-          const fallbackFeatured = fallbackMovies.filter(movie => movie.isFeatured);
-          setFeatured(fallbackFeatured);
-          setUsingFallbackData(true);
-        }
-        
-        // Process categories and fetch movies for each category
-        if (categoriesResponse.success && Array.isArray(categoriesResponse.data)) {
-          console.log('Home: Processing categories data...');
-          const topCategories = categoriesResponse.data.slice(0, 6);
-          console.log('Home: Selected top categories:', topCategories.length);
           
-          // Fetch movies for each category
-          const categoryData = await Promise.all(
-            topCategories.map(async (category) => {
-              try {
-                console.log('Home: Fetching movies for category:', category.name);
-                const response = await apiUtils.get('/movies', { 
-                  genre: category.name,
-                  limit: 10
-                });
-                
-                if (response.success && Array.isArray(response.data) && response.data.length > 0) {
-                  console.log('Home: Found movies for category:', category.name, response.data.length);
-                  return {
-                    name: category.name,
-                    movies: response.data
-                  };
+          // Process movies by genre
+          const genreMap = {};
+          
+          allMovies.forEach(movie => {
+            if (movie.genres && Array.isArray(movie.genres)) {
+              movie.genres.forEach(genre => {
+                if (!genreMap[genre]) {
+                  genreMap[genre] = [];
                 }
-                console.log('Home: No movies found for category:', category.name);
-                return null;
-              } catch (error) {
-                console.error('Home: Error fetching movies for category:', category.name, error);
-                return null;
-              }
-            })
-          );
+                genreMap[genre].push(movie);
+              });
+            }
+          });
           
-          // Filter out categories that didn't return any movies
-          const validCategories = categoryData.filter(category => category !== null);
-          console.log('Home: Valid categories with movies:', validCategories.length);
+          // Convert map to array of category objects
+          // Sort genres by number of movies (descending)
+          const categoriesData = Object.keys(genreMap)
+            .filter(genre => genreMap[genre].length >= 4) // Only use genres with enough movies
+            .sort((a, b) => genreMap[b].length - genreMap[a].length)
+            .map(genre => ({
+              name: genre,
+              movies: genreMap[genre].slice(0, 10) // Limit to 10 movies per category
+            }))
+            .slice(0, 6); // Limit to 6 categories
           
-          if (validCategories.length > 0) {
-            setCategories(validCategories);
-          } else {
-            console.log('Home: No valid categories found, using fallback');
-            useFallbackCategories();
-          }
+          console.log('Home: Created categories from all movies:', categoriesData.length);
+          setCategories(categoriesData);
         } else {
-          console.log('Home: Category response invalid, using fallback');
-          useFallbackCategories();
+          console.log('Home: API response invalid, using fallback data');
+          // Use fallback data
+          useFallbackData();
         }
       } catch (error) {
         console.error('Home: Error fetching data:', error);
         // Use fallback data
-        const fallbackFeatured = fallbackMovies.filter(movie => movie.isFeatured);
-        setFeatured(fallbackFeatured);
-        useFallbackCategories();
-        setUsingFallbackData(true);
+        useFallbackData();
         setError('Failed to load from API, using fallback data');
       } finally {
         setIsLoading(false);
       }
     };
     
-    const useFallbackCategories = () => {
-      console.log('Home: Creating fallback categories');
-      // Create categories from sample data
+    const useFallbackData = () => {
+      console.log('Home: Using fallback data');
+      // Set featured movies from fallback data
+      const fallbackFeatured = fallbackMovies.filter(movie => movie.isFeatured);
+      setFeatured(fallbackFeatured);
+      
+      // Create categories from fallback data
       const genreMap = {};
       
       fallbackMovies.forEach(movie => {

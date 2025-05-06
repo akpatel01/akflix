@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import movieService from '../services/movieService';
 import apiUtils from '../utils/apiUtils';
 
 const CategoryCard = ({ category, count, movies = [] }) => {
@@ -49,45 +48,77 @@ const CategoriesPage = () => {
       try {
         setIsLoading(true);
         
-        // Fetch all categories
-        const categoriesResponse = await apiUtils.get('/movies/categories');
+        // Make a single API call to get all movies (with limit)
+        // Using a higher limit to get most movies in one request
+        const moviesResponse = await apiUtils.get('/movies', { limit: 100 });
         
-        if (categoriesResponse.success && Array.isArray(categoriesResponse.data)) {
-          // Fetch stats to get movie counts by genre
-          const statsResponse = await apiUtils.get('/movies/stats');
+        if (moviesResponse.success && Array.isArray(moviesResponse.data)) {
+          const allMovies = moviesResponse.data;
           
-          // Create a map of genre to movie count
-          const countMap = {};
-          if (statsResponse.success && statsResponse.data && statsResponse.data.byGenre) {
-            statsResponse.data.byGenre.forEach(item => {
-              countMap[item.name] = item.count;
-            });
-          }
+          // Extract all unique genres and count movies per genre
+          const genreCounts = {};
+          const moviesByGenreMap = {};
           
-          // Add counts to categories
-          const categoriesWithCounts = categoriesResponse.data.map(category => ({
-            ...category,
-            count: countMap[category.name] || 0
-          })).sort((a, b) => b.count - a.count); // Sort by popularity (count)
+          // Process movies to group by genre
+          allMovies.forEach(movie => {
+            if (movie.genres && Array.isArray(movie.genres)) {
+              movie.genres.forEach(genre => {
+                // Count movies per genre
+                if (!genreCounts[genre]) {
+                  genreCounts[genre] = 0;
+                  moviesByGenreMap[genre] = [];
+                }
+                genreCounts[genre]++;
+                
+                // Add movie to its genre's list (up to 3 per genre)
+                if (moviesByGenreMap[genre].length < 3) {
+                  moviesByGenreMap[genre].push(movie);
+                }
+              });
+            }
+          });
+          
+          // Convert to category objects format
+          const categoriesWithCounts = Object.keys(genreCounts).map(genre => ({
+            name: genre,
+            count: genreCounts[genre]
+          })).sort((a, b) => b.count - a.count); // Sort by popularity
           
           setCategories(categoriesWithCounts);
-          
-          // Fetch sample movies for each category (for thumbnails)
-          const genreMoviesMap = {};
-          for (const category of categoriesWithCounts) {
-            if (category.count > 0) {
-              const response = await apiUtils.get('/movies', { genre: category.name });
-              if (response.success && Array.isArray(response.data)) {
-                genreMoviesMap[category.name] = response.data.slice(0, 3);
-              }
-            }
-          }
-          
-          setMoviesByGenre(genreMoviesMap);
+          setMoviesByGenre(moviesByGenreMap);
         } else {
-          setError('Failed to load categories');
+          // Fallback to stats API if the first method fails
+          // This is less efficient but ensures backward compatibility
+          console.log('Falling back to separate API calls');
+          
+          // Fetch all categories
+          const categoriesResponse = await apiUtils.get('/movies/categories');
+          
+          if (categoriesResponse.success && Array.isArray(categoriesResponse.data)) {
+            // Fetch stats to get movie counts by genre
+            const statsResponse = await apiUtils.get('/movies/stats');
+            
+            // Create a map of genre to movie count
+            const countMap = {};
+            if (statsResponse.success && statsResponse.data && statsResponse.data.byGenre) {
+              statsResponse.data.byGenre.forEach(item => {
+                countMap[item.name] = item.count;
+              });
+            }
+            
+            // Add counts to categories
+            const categoriesWithCounts = categoriesResponse.data.map(category => ({
+              ...category,
+              count: countMap[category.name] || 0
+            })).sort((a, b) => b.count - a.count); // Sort by popularity
+            
+            setCategories(categoriesWithCounts);
+          } else {
+            setError('Failed to load categories');
+          }
         }
       } catch (err) {
+        console.error('Error loading categories:', err);
         setError('An error occurred while loading content');
       } finally {
         setIsLoading(false);

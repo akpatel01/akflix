@@ -63,12 +63,12 @@ function AppContent() {
         <Route path="/watch/:id" element={<Player />} />
         <Route path="/genre/:genreId" element={<GenrePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
-        <Route path="/watchlist" element={<Watchlist />} />
-        <Route path="/watched" element={<Watched />} />
+        <Route path="/watchlist" element={currentUser ? <Watchlist /> : <Navigate to="/login" />} />
+        <Route path="/watched" element={currentUser ? <Watched /> : <Navigate to="/login" />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={currentUser ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/admin-setup" element={<AdminSetup />} />
         
         {/* Admin Routes */}
@@ -124,13 +124,18 @@ function App() {
           <>
             <Header toggleSidebar={toggleSidebar} />
             <div className="flex h-screen">
+              {/* Sidebar - hidden on mobile, visible on desktop */}
               <Sidebar />
-              <main className="flex-1 pt-16 pb-20 lg:ml-16 lg:pb-0 overflow-y-auto bg-black">
+              
+              {/* Main content */}
+              <main className="w-full flex-1 pt-16 pb-20 lg:ml-16 lg:pb-0 overflow-y-auto bg-black">
                 <div className="w-full">
                   <AppContent />
                 </div>
               </main>
             </div>
+            
+            {/* Mobile Navigation */}
             <MobileNavigation />
           </>
         )}
