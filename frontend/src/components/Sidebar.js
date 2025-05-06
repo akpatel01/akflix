@@ -5,13 +5,13 @@ import movieService from '../services/movieService';
 import apiUtils from '../utils/apiUtils';
 
 // Simplified MenuItem component with icon-focused design
-const MenuItem = ({ to, icon, children, onClick, isActive }) => {
+const MenuItem = ({ to, icon, children, onClick, isActive, showTooltip = true }) => {
   return (
     <NavLink 
       to={to}
       onClick={onClick}
       className={({ isActive }) => 
-        `flex items-center justify-center h-14 transition-all duration-200 relative group
+        `flex items-center justify-center transition-all duration-200 relative group
          ${isActive 
           ? 'text-white' 
           : 'text-gray-500 hover:text-white'}`
@@ -20,10 +20,12 @@ const MenuItem = ({ to, icon, children, onClick, isActive }) => {
       <div className="relative flex items-center justify-center w-full h-full">
         <i className={`${icon} text-xl group-hover:text-white transition-colors
                       ${isActive ? 'text-white' : ''}`}></i>
-        <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
-                       pointer-events-none bg-black/90 py-1.5 px-3 rounded-sm transition-opacity duration-200 z-50">
-          {children}
-        </span>
+        {showTooltip && (
+          <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
+                         pointer-events-none bg-black/90 py-1.5 px-3 rounded-sm transition-opacity duration-200 z-50">
+            {children}
+          </span>
+        )}
       </div>
     </NavLink>
   );
@@ -60,6 +62,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { currentUser, isAdmin } = useAuth();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
   
   // Fetch categories from API
   useEffect(() => {
@@ -96,11 +99,28 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     return genreIcons[genreName] || defaultIcon;
   };
   
+  // Define navigation items
+  const navigationItems = [
+    { to: "/", icon: "fas fa-home", label: "Home" },
+    { to: "/search", icon: "fas fa-search", label: "Search" },
+    { to: "/movies", icon: "fas fa-play", label: "Movies" },
+    { to: "/tv-shows", icon: "fas fa-tv", label: "TV Shows" },
+    { to: "/categories", icon: "fas fa-th-large", label: "Categories" }
+  ];
+
+  // Add conditional items
+  if (currentUser) {
+    navigationItems.push({ to: "/watchlist", icon: "fas fa-plus", label: "My List" });
+    navigationItems.push({ to: "/profile", icon: "fas fa-user", label: "Profile" });
+  }
+  if (isAdmin) {
+    navigationItems.push({ to: "/admin", icon: "fas fa-cog", label: "Admin" });
+  }
+  
   return (
     <>
-      <aside 
-        className="fixed top-0 left-0 h-full w-16 py-0 z-[900] bg-black flex flex-col items-center"
-      >
+      {/* Desktop Sidebar */}
+      <aside className="fixed top-0 left-0 h-full w-16 py-0 z-[900] bg-black hidden lg:flex flex-col items-center">
         <div className="flex flex-col items-center w-full h-full pt-0 pb-8">
           {/* Logo */}
           <Link to="/" className="flex items-center justify-center h-16 w-full">
@@ -111,54 +131,39 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           
           {/* Main Navigation */}
           <div className="w-full flex flex-col items-center space-y-5 mt-8">
-            <MenuItem to="/" icon="fas fa-home" onClick={handleMenuItemClick}>
-              Home
-            </MenuItem>
-            <MenuItem to="/search" icon="fas fa-search" onClick={handleMenuItemClick}>
-              Search
-            </MenuItem>
-            <MenuItem to="/movies" icon="fas fa-play" onClick={handleMenuItemClick}>
-              Movies
-            </MenuItem>
-            <MenuItem to="/tv-shows" icon="fas fa-tv" onClick={handleMenuItemClick}>
-              TV Shows
-            </MenuItem>
-            <MenuItem to="/categories" icon="fas fa-th-large" onClick={handleMenuItemClick}>
-              Categories
-            </MenuItem>
-            <MenuItem to="/watchlist" icon="fas fa-plus" onClick={handleMenuItemClick}>
-              My List
-            </MenuItem>
-          </div>
-          
-          {/* User profile - at the bottom */}
-          <div className="flex flex-col items-center w-full mt-auto">
-            {currentUser && (
-              <Link to="/profile" className="flex items-center justify-center h-14 w-full relative group">
-                <div className="text-gray-500 flex items-center justify-center group-hover:text-white">
-                  <i className="fas fa-user text-xl"></i>
-                </div>
-                <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
-                              pointer-events-none bg-black/90 py-1.5 px-3 rounded-sm transition-opacity duration-200">
-                  {currentUser.displayName || currentUser.email || 'My Profile'}
-                </span>
-              </Link>
-            )}
-            
-            {isAdmin && (
-              <Link to="/admin" className="flex items-center justify-center h-14 w-full relative group">
-                <div className="text-gray-500 flex items-center justify-center group-hover:text-white">
-                  <i className="fas fa-cog text-xl"></i>
-                </div>
-                <span className="absolute left-full ml-4 whitespace-nowrap text-xs font-medium opacity-0 group-hover:opacity-100 
-                              pointer-events-none bg-black/90 py-1.5 px-3 rounded-sm transition-opacity duration-200">
-                  Admin
-                </span>
-              </Link>
-            )}
+            {navigationItems.map((item) => (
+              <MenuItem 
+                key={item.to} 
+                to={item.to} 
+                icon={item.icon} 
+                onClick={handleMenuItemClick}
+              >
+                {item.label}
+              </MenuItem>
+            ))}
           </div>
         </div>
       </aside>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-black z-[900] lg:hidden">
+        <div className="grid grid-cols-8 h-full">
+          {navigationItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={handleMenuItemClick}
+              className={({ isActive }) => 
+                `flex flex-col items-center justify-center text-center px-0.5
+                 ${isActive ? 'text-white' : 'text-gray-500 hover:text-white'}`
+              }
+            >
+              <i className={`${item.icon} text-[16px] mb-0.5`}></i>
+              <span className="text-[8px] leading-tight truncate w-full">{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </div>
     </>
   );
 };

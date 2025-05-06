@@ -124,7 +124,7 @@ function App() {
             <Header toggleSidebar={toggleSidebar} />
             <div className="flex h-screen">
               <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-              <main className="flex-1 ml-16 pt-16 overflow-y-auto bg-black">
+              <main className="flex-1 lg:ml-16 pt-16 pb-20 lg:pb-0 overflow-y-auto bg-black">
                 <AppContent />
               </main>
             </div>
