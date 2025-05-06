@@ -178,24 +178,14 @@ const movieService = {
     }
   },
 
-  // Get secure video URL for a movie
+  // Get secure video URL for a movie - simplified version
   getSecureVideoUrl: async (id) => {
     try {
-      // Make sure the ID is valid
-      if (!id) {
-        return { success: false, message: 'Invalid movie ID' };
-      }
-      
+      if (!id) return { success: false };
       return await apiUtils.get(`/movies/${id}/secure-video`);
     } catch (error) {
-      // Handle different error types
-      if (error.response) {
-        return error.response.data || { success: false, message: `Server error: ${error.response.status}` };
-      } else if (error.request) {
-        return { success: false, message: 'No response from server. Please check your connection.' };
-      } else {
-        return { success: false, message: error.message || 'Unknown error occurred' };
-      }
+      console.error('Error fetching secure video URL:', error);
+      return { success: false };
     }
   }
 };

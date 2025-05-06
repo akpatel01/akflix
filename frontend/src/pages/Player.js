@@ -24,8 +24,6 @@ const Player = () => {
   const [showWatchlistConfirm, setShowWatchlistConfirm] = useState(false);
   const [hasMarkedAsWatched, setHasMarkedAsWatched] = useState(false);
   const [secureVideoUrl, setSecureVideoUrl] = useState(null);
-  const [videoUrlExpiry, setVideoUrlExpiry] = useState(null);
-  const [videoError, setVideoError] = useState(false);
   
   const handleUpdateWatched = useCallback(async (movieId, movieTitle) => {
     if (!currentUser) return;
@@ -104,44 +102,20 @@ const Player = () => {
     fetchContent();
   }, [id, currentUser]);
   
-  // Function to fetch secure video URL
+  // Simple function to fetch secure video URL
   const fetchSecureVideoUrl = async (movieId) => {
     try {
       const response = await movieService.getSecureVideoUrl(movieId);
       
       if (response.success && response.data) {
         setSecureVideoUrl(response.data.secureUrl);
-        setVideoUrlExpiry(response.data.expiresAt);
-        setVideoError(false);
       } else {
-        // If we can't get secure URL, we'll fall back to the regular URL
-        setVideoError(true);
-        toast.error('Unable to obtain secure video access');
+        console.log('Secure video URL not available, using standard URL');
       }
     } catch (error) {
       console.error('Error fetching secure video URL:', error);
-      setVideoError(true);
     }
   };
-  
-  // Refresh secure URL if it's about to expire
-  useEffect(() => {
-    if (!videoUrlExpiry || !currentUser) return;
-    
-    // Convert expiry to milliseconds and subtract current time
-    const expiryTime = new Date(videoUrlExpiry * 1000);
-    const currentTime = new Date();
-    const timeUntilExpiry = expiryTime - currentTime;
-    
-    // If URL expires in less than 5 minutes, set a timer to refresh it
-    if (timeUntilExpiry > 0 && timeUntilExpiry < 5 * 60 * 1000) {
-      const refreshTimer = setTimeout(() => {
-        fetchSecureVideoUrl(id);
-      }, timeUntilExpiry - 60000); // Refresh 1 minute before expiry
-      
-      return () => clearTimeout(refreshTimer);
-    }
-  }, [videoUrlExpiry, id, currentUser]);
   
   // Separate effect for updating watched status
   useEffect(() => {
