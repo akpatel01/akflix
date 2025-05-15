@@ -6,14 +6,6 @@ import movieService from '../services/movieService';
 import { useToast } from '../context/ToastContext';
 import AlertModal from '../components/AlertModal';
 
-// Preset profile picture options
-const profilePicOptions = [
-  'https://i.pravatar.cc/150?img=12',
-  'https://i.pravatar.cc/150?img=33',
-  'https://i.pravatar.cc/150?img=48',
-  'https://i.pravatar.cc/150?img=65'
-];
-
 const Profile = () => {
   const { currentUser, logout, updateProfile, updateUser, isAdmin } = useAuth();
   const toast = useToast();
@@ -121,13 +113,6 @@ const Profile = () => {
     setPasswordData({
       ...passwordData,
       [name]: value
-    });
-  };
-  
-  const handleProfilePicSelect = (picUrl) => {
-    setFormData({
-      ...formData,
-      profilePic: picUrl
     });
   };
   
@@ -421,59 +406,30 @@ const Profile = () => {
                     <div>
                       <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
                       <form onSubmit={handleProfileUpdate}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-4">
-                            <div>
-                              <label htmlFor="username" className="block text-gray-300 mb-1">Username</label>
-                              <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleInputChange}
-                                className="w-full bg-gray-800 text-white p-3 rounded"
-                                required
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="email" className="block text-gray-300 mb-1">Email</label>
-                              <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                className="w-full bg-gray-800 text-white p-3 rounded"
-                                required
-                              />
-                            </div>
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="username" className="block text-gray-300 mb-1">Username</label>
+                            <input
+                              type="text"
+                              id="username"
+                              name="username"
+                              value={formData.username}
+                              onChange={handleInputChange}
+                              className="w-full bg-gray-800 text-white p-3 rounded"
+                              required
+                            />
                           </div>
-
-                          <div className="bg-gray-800 rounded-lg p-4">
-                            <label className="block text-gray-300 mb-3 text-center">Choose Profile Picture</label>
-                            <div className="grid grid-cols-4 gap-2 max-w-[200px] mx-auto">
-                              {profilePicOptions.map((pic, index) => (
-                                <div 
-                                  key={index}
-                                  onClick={() => handleProfilePicSelect(pic)}
-                                  className={`w-10 h-10 rounded-full overflow-hidden cursor-pointer transition-all ${
-                                    formData.profilePic === pic ? 'ring-2 ring-netflix-red scale-110' : 'opacity-70 hover:opacity-100'
-                                  }`}
-                                >
-                                  {pic ? (
-                                    <img 
-                                      src={pic} 
-                                      alt={`Profile option ${index + 1}`} 
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-700 text-gray-400">
-                                      <i className="fas fa-user"></i>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
+                          <div>
+                            <label htmlFor="email" className="block text-gray-300 mb-1">Email</label>
+                            <input
+                              type="email"
+                              id="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              className="w-full bg-gray-800 text-white p-3 rounded"
+                              required
+                            />
                           </div>
                         </div>
 
@@ -559,48 +515,40 @@ const Profile = () => {
                       
                       {isContentLoading ? (
                         <div className="flex justify-center py-8">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-netflix-red"></div>
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-netflix-red"></div>
                         </div>
                       ) : watchlistItems.length === 0 ? (
-                        <div className="text-center py-8">
-                          <p className="text-gray-400">Your watchlist is empty.</p>
-                          <p className="text-gray-500 mt-2">
-                            Add movies or TV shows by clicking the + button on any title.
-                          </p>
+                        <div className="py-8 text-center">
+                          <p className="text-gray-400">Your watchlist is empty</p>
+                          <Link to="/" className="text-netflix-red hover:underline mt-2 inline-block">
+                            Browse Movies
+                          </Link>
                         </div>
                       ) : (
-                        <div className="space-y-3">
-                          {watchlistItems.map((item) => (
-                            <div
-                              key={item._id}
-                              className="bg-gray-800 rounded-lg p-3 flex items-start"
-                            >
-                              <div className="w-20 h-28 flex-shrink-0 rounded overflow-hidden mr-3">
-                                <img 
-                                  src={item.poster} 
-                                  alt={item.title} 
-                                  className="w-full h-full object-cover" 
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          {watchlistItems.map(movie => (
+                            <div key={movie._id} className="bg-gray-800 rounded-lg overflow-hidden shadow">
+                              <div className="relative pb-2/3">
+                                <img
+                                  src={movie.poster}
+                                  alt={movie.title}
+                                  className="absolute h-full w-full object-cover"
                                 />
                               </div>
-                              
-                              <div className="flex-1">
-                                <h3 className="text-white font-bold">{item.title}</h3>
-                                <p className="text-gray-400 text-sm">{item.year} • {item.duration}</p>
-                                <p className="text-gray-400 text-sm mb-2">{item.genres.join(', ')}</p>
-                                
-                                <div className="flex space-x-2">
-                                  <button
-                                    onClick={() => navigate(`/watch/${item._id}`)}
-                                    className="text-white bg-netflix-red px-3 py-1 rounded text-sm hover:bg-red-700"
+                              <div className="p-2">
+                                <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
+                                <div className="flex justify-between items-center mt-2">
+                                  <Link 
+                                    to={`/movie/${movie._id}`}
+                                    className="text-xs bg-netflix-red text-white px-2 py-1 rounded"
                                   >
-                                    <i className="fas fa-play mr-1"></i> Play
-                                  </button>
-                                  
+                                    View
+                                  </Link>
                                   <button
-                                    onClick={() => handleRemoveFromWatchlist(item._id)}
-                                    className="text-white bg-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-600"
+                                    onClick={() => handleRemoveFromWatchlist(movie._id)}
+                                    className="text-xs bg-gray-700 text-white px-2 py-1 rounded"
                                   >
-                                    <i className="fas fa-times mr-1"></i> Remove
+                                    Remove
                                   </button>
                                 </div>
                               </div>
@@ -617,48 +565,40 @@ const Profile = () => {
                       
                       {isContentLoading ? (
                         <div className="flex justify-center py-8">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-netflix-red"></div>
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-netflix-red"></div>
                         </div>
                       ) : watchedItems.length === 0 ? (
-                        <div className="text-center py-8">
-                          <p className="text-gray-400">Your watch history is empty.</p>
-                          <p className="text-gray-500 mt-2">
-                            Movies and TV shows you've watched will appear here.
-                          </p>
+                        <div className="py-8 text-center">
+                          <p className="text-gray-400">Your watch history is empty</p>
+                          <Link to="/" className="text-netflix-red hover:underline mt-2 inline-block">
+                            Browse Movies
+                          </Link>
                         </div>
                       ) : (
-                        <div className="space-y-3">
-                          {watchedItems.map((item) => (
-                            <div
-                              key={item._id}
-                              className="bg-gray-800 rounded-lg p-3 flex items-start"
-                            >
-                              <div className="w-20 h-28 flex-shrink-0 rounded overflow-hidden mr-3">
-                                <img 
-                                  src={item.poster} 
-                                  alt={item.title} 
-                                  className="w-full h-full object-cover" 
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          {watchedItems.map(movie => (
+                            <div key={movie._id} className="bg-gray-800 rounded-lg overflow-hidden shadow">
+                              <div className="relative pb-2/3">
+                                <img
+                                  src={movie.poster}
+                                  alt={movie.title}
+                                  className="absolute h-full w-full object-cover"
                                 />
                               </div>
-                              
-                              <div className="flex-1">
-                                <h3 className="text-white font-bold">{item.title}</h3>
-                                <p className="text-gray-400 text-sm">{item.year} • {item.duration}</p>
-                                <p className="text-gray-400 text-sm mb-2">{item.genres.join(', ')}</p>
-                                
-                                <div className="flex space-x-2">
-                                  <button
-                                    onClick={() => navigate(`/watch/${item._id}`)}
-                                    className="text-white bg-netflix-red px-3 py-1 rounded text-sm hover:bg-red-700"
+                              <div className="p-2">
+                                <h3 className="text-sm font-semibold truncate">{movie.title}</h3>
+                                <div className="flex justify-between items-center mt-2">
+                                  <Link 
+                                    to={`/movie/${movie._id}`}
+                                    className="text-xs bg-netflix-red text-white px-2 py-1 rounded"
                                   >
-                                    <i className="fas fa-play mr-1"></i> Play Again
-                                  </button>
-                                  
+                                    View
+                                  </Link>
                                   <button
-                                    onClick={() => handleRemoveFromWatched(item._id)}
-                                    className="text-white bg-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-600"
+                                    onClick={() => handleRemoveFromWatched(movie._id)}
+                                    className="text-xs bg-gray-700 text-white px-2 py-1 rounded"
                                   >
-                                    <i className="fas fa-times mr-1"></i> Remove
+                                    Remove
                                   </button>
                                 </div>
                               </div>
@@ -674,18 +614,16 @@ const Profile = () => {
           </div>
         </div>
       </div>
-
+      
       {/* Logout Confirmation Modal */}
       <AlertModal
         isOpen={showLogoutConfirm}
         title="Confirm Logout"
-        message="Are you sure you want to log out?"
-        confirmLabel="Logout"
-        cancelLabel="Cancel"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        cancelText="Cancel"
         onConfirm={handleConfirmLogout}
-        onClose={() => setShowLogoutConfirm(false)}
-        showCancel={true}
-        type="warning"
+        onCancel={() => setShowLogoutConfirm(false)}
       />
     </div>
   );
