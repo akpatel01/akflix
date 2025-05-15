@@ -61,10 +61,30 @@ const authService = {
     return user.role === 'admin';
   },
 
-  // Get stored user data
+  // Get user from localStorage
   getUser: () => {
-    return JSON.parse(localStorage.getItem('akflix_user') || '{}');
+    const userStr = localStorage.getItem('akflix_user');
+    if (!userStr) return null;
+    return JSON.parse(userStr);
   },
+
+  // Upload profile image
+  uploadProfileImage: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const response = await api.post('/auth/upload-profile-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : { success: false, message: 'Network error' };
+    }
+  }
 };
 
 export default authService; 

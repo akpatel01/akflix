@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-// Preset profile picture options
-const profilePicOptions = [
-  'https://i.pravatar.cc/150?img=12',
-  'https://i.pravatar.cc/150?img=33',
-  'https://i.pravatar.cc/150?img=48',
-  'https://i.pravatar.cc/150?img=65'
-];
+import authService from '../services/authService';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -20,17 +13,12 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploadLoading, setUploadLoading] = useState(false);
   
   const { signup, currentUser, error: authError } = useAuth();
   const navigate = useNavigate();
-  
-  // Set a default profile pic on component mount
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      profilePic: profilePicOptions[0]
-    }));
-  }, []);
   
   // Redirect if user is already logged in
   useEffect(() => {
@@ -47,11 +35,58 @@ const Signup = () => {
     });
   };
   
-  const handleProfilePicSelect = (picUrl) => {
-    setFormData({
-      ...formData,
-      profilePic: picUrl
-    });
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.match('image.*')) {
+      setError('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Image must be less than 2MB');
+      return;
+    }
+    
+    setUploadedImage(file);
+    
+    // Create image preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleImageUpload = async () => {
+    if (!uploadedImage) {
+      setError('Please select an image to upload');
+      return;
+    }
+    
+    setUploadLoading(true);
+    setError('');
+    
+    try {
+      const response = await authService.uploadProfileImage(uploadedImage);
+      
+      if (response.success) {
+        setFormData(prev => ({
+          ...prev,
+          profilePic: response.file.url
+        }));
+        setError('');
+      } else {
+        setError('Failed to upload image. Please try again.');
+      }
+    } catch (err) {
+      setError(err.message || 'Error uploading image');
+    } finally {
+      setUploadLoading(false);
+    }
   };
   
   const validateForm = () => {
@@ -81,7 +116,7 @@ const Signup = () => {
     }
     
     if (!formData.profilePic) {
-      setError('Please select a profile picture');
+      setError('Please upload a profile picture');
       return false;
     }
     
@@ -174,24 +209,55 @@ const Signup = () => {
           </div>
           
           <div className="mb-6">
-            <label className="block text-white mb-2">Choose your profile picture</label>
-            <div className="flex justify-between items-center">
-              {profilePicOptions.map((pic, index) => (
-                <div 
-                  key={index}
-                  onClick={() => handleProfilePicSelect(pic)}
-                  className={`
-                    w-16 h-16 rounded-full overflow-hidden cursor-pointer transition-all
-                    ${formData.profilePic === pic ? 'ring-4 ring-netflix-red scale-110' : 'opacity-70 hover:opacity-100'}
-                  `}
-                >
+            <label className="block text-white mb-2">Upload your profile picture</label>
+            <div className="flex flex-col items-center mb-3">
+              {imagePreview ? (
+                <div className="w-24 h-24 rounded-full overflow-hidden mb-3">
                   <img 
-                    src={pic} 
-                    alt={`Profile option ${index + 1}`} 
+                    src={imagePreview} 
+                    alt="Profile preview" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-              ))}
+              ) : formData.profilePic ? (
+                <div className="w-24 h-24 rounded-full overflow-hidden mb-3">
+                  <img 
+                    src={formData.profilePic} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center mb-3">
+                  <span className="text-white text-5xl">?</span>
+                </div>
+              )}
+              
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+                id="profile-image-upload"
+              />
+              <div className="flex space-x-2">
+                <label
+                  htmlFor="profile-image-upload"
+                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 cursor-pointer"
+                >
+                  Select Image
+                </label>
+                {uploadedImage && !formData.profilePic && (
+                  <button
+                    type="button"
+                    onClick={handleImageUpload}
+                    disabled={uploadLoading}
+                    className="px-4 py-2 bg-netflix-red text-white rounded hover:bg-red-700"
+                  >
+                    {uploadLoading ? 'Uploading...' : 'Upload'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           
